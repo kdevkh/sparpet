@@ -1,5 +1,6 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -63,6 +64,27 @@ router.post('/sign-up', async (req, res, next) => {
   });
 
   return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
+});
+
+router.post('/sign-in', async (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: '이메일은 필수값입니다.' });
+  }
+  if (!password) {
+    return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+  }
+
+  const user = await prisma.users.findFirst({
+    where: { email, password },
+  });
+  if (!user) {
+    return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+  }
+  const accessToken = jwt.sign({ userId: user.id }, 'secretKey', {
+    expiresIn: '12h',
+  });
+  return res.json({ accessToken });
 });
 
 export default router;
