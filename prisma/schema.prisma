@@ -22,9 +22,9 @@ model Users {
   birth         DateTime @map("birth")
   name          String   @map("name")
   profile_image String?  @map("profile_image")
+  createdAt     DateTime   @default(now()) @map("createdAt")
+  updatedAt     DateTime   @updatedAt @map("updatedAt")
 
-  createdAt  DateTime   @default(now()) @map("createdAt")
-  updatedAt  DateTime   @updatedAt @map("updatedAt")
   posts      Posts[]
   likes      Likes[]
   comments   Comments[]
@@ -35,13 +35,15 @@ model Users {
 }
 
 model Posts {
-  id      Int    @id @default(autoincrement()) @map("id")
-  content String @map("content")
-  userId  Int    @map("userId")
+  id         Int    @id @default(autoincrement()) @map("id")
+  content    String @map("content")
+  userId     Int    @map("userId")
+  createdAt  DateTime   @default(now()) @map("createdAt")
+  updatedAt  DateTime   @updatedAt @map("updatedAt")
 
-  user     Users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  comments Comments[]
-  likes    Likes[]
+  user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comments   Comments[]
+  likes      Likes[]
 
   @@map("Posts")
 }
@@ -60,14 +62,16 @@ model Likes {
 }
 
 model Comments {
-  id      Int    @id @default(autoincrement()) @map("id")
-  postId  Int    @map("postId")
-  userId  Int    @map("userId")
-  content String @map("content")
+  id         Int    @id @default(autoincrement()) @map("id")
+  postId     Int    @map("postId")
+  userId     Int    @map("userId")
+  content    String @map("content")
+  createdAt  DateTime   @default(now()) @map("createdAt")
+  updatedAt  DateTime   @updatedAt @map("updatedAt")
 
-  user  Users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  post  Posts   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  likes Likes[]
+  user       Users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post       Posts   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  likes      Likes[]
 
   @@map("Comments")
 }
@@ -77,9 +81,8 @@ model Follows {
   followedById Int   @map("followerId")
   following    Users @relation("following", fields: [followingId], references: [id])
   followingId  Int   @map("followingId")
-
-  createdAt DateTime @default(now()) @map("createdAt")
-  updatedAt DateTime @updatedAt @map("updatedAt")
+  createdAt    DateTime @default(now()) @map("createdAt")
+  updatedAt    DateTime @updatedAt @map("updatedAt")
 
   @@id([followedById, followingId])
   @@map("Follows")
