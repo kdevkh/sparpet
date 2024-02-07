@@ -36,6 +36,7 @@ model Users {
 
 model Posts {
   id         Int        @id @default(autoincrement()) @map("id")
+  title      String     @map("title")
   content    String     @map("content") @db.Text
   userId     Int        @map("userId")
   createdAt  DateTime   @default(now()) @map("createdAt")
