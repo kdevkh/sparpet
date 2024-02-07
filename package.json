@@ -1,9 +1,13 @@
 {
-  "name": "Sparpet",
+  "name": "sparpet",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "dev": "npx nodemon app.js",
+    "format": "prettier --write *.js **/*.js"
+  },
   "dependencies": {
     "@prisma/client": "^5.9.1",
     "cookie-parser": "^1.4.6",
