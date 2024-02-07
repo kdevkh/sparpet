@@ -32,8 +32,8 @@ const jwtValidate = async (req, res, next) => {
       throw new Error('인증 정보가 틀렸습니다.');
     }
 
-    req.locals = req.locals || {};
-    req.locals.user = user;
+    res.locals.user = user;
+    console.log(user);
 
     next();
   } catch (err) {

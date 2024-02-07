@@ -94,7 +94,7 @@ router.post('/sign-in', async (req, res, next) => {
 
 // 내 정보 조회
 router.get('/profile', jwtValidate, (req, res, next) => {
-  const user = req.locals.user;
+  const user = res.locals.user;
 
   return res.json({
     email: user.email,

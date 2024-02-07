@@ -79,4 +79,31 @@ router.get('/:postId', async (req, res, next) => {
   return res.json({ data: post });
 });
 
+// 게시글 생성
+router.post('/', jwtValidate, async (req, res, next) => {
+  const user = res.locals.user;
+  console.log(user);
+  const { title, content } = req.body;
+  if (!title) {
+    return res.status(400).json({
+      success: false,
+      message: '게시글 제목은 필수값입니다.',
+    });
+  }
+  if (!content) {
+    return res.status(400).json({
+      success: false,
+      message: '게시글 내용을 입력해주세요.',
+    });
+  }
+  await prisma.posts.create({
+    data: {
+      title,
+      content,
+      userId: user.id,
+    },
+  });
+  return res.status(201).json({});
+});
+
 export default router;
