@@ -21,9 +21,9 @@ model Users {
   gender        Gender   @map("gender")
   birth         DateTime @map("birth")
   name          String   @map("name")
-  profile_image String?  @map("profile_image")
-  createdAt     DateTime   @default(now()) @map("createdAt")
-  updatedAt     DateTime   @updatedAt @map("updatedAt")
+  profileImage String?   @map("profileImage")
+  createdAt     DateTime @default(now()) @map("createdAt")
+  updatedAt     DateTime @updatedAt @map("updatedAt")
 
   posts      Posts[]
   likes      Likes[]
@@ -35,9 +35,9 @@ model Users {
 }
 
 model Posts {
-  id         Int    @id @default(autoincrement()) @map("id")
-  content    String @map("content")
-  userId     Int    @map("userId")
+  id         Int        @id @default(autoincrement()) @map("id")
+  content    String     @map("content")
+  userId     Int        @map("userId")
   createdAt  DateTime   @default(now()) @map("createdAt")
   updatedAt  DateTime   @updatedAt @map("updatedAt")
 
@@ -62,10 +62,10 @@ model Likes {
 }
 
 model Comments {
-  id         Int    @id @default(autoincrement()) @map("id")
-  postId     Int    @map("postId")
-  userId     Int    @map("userId")
-  content    String @map("content")
+  id         Int        @id @default(autoincrement()) @map("id")
+  postId     Int        @map("postId")
+  userId     Int        @map("userId")
+  content    String     @map("content")
   createdAt  DateTime   @default(now()) @map("createdAt")
   updatedAt  DateTime   @updatedAt @map("updatedAt")
 
@@ -77,10 +77,10 @@ model Comments {
 }
 
 model Follows {
-  followedBy   Users @relation("followedBy", fields: [followedById], references: [id])
-  followedById Int   @map("followerId")
-  following    Users @relation("following", fields: [followingId], references: [id])
-  followingId  Int   @map("followingId")
+  followedBy   Users    @relation("followedBy", fields: [followedById], references: [id])
+  followedById Int      @map("followerId")
+  following    Users    @relation("following", fields: [followingId], references: [id])
+  followingId  Int      @map("followingId")
   createdAt    DateTime @default(now()) @map("createdAt")
   updatedAt    DateTime @updatedAt @map("updatedAt")
 

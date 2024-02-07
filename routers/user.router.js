@@ -3,7 +3,16 @@ import express from 'express';
 const router = express.Router();
 
 router.post('/sign-up', (Req, res, next) => {
-  const { email, password, passwordConfirm, name } = req.body;
+  const {
+    email,
+    password,
+    passwordConfirm,
+    name,
+    phone,
+    gender,
+    birth,
+    profileImage,
+  } = req.body;
   if (!email) {
     return res.status(400).json({ message: '이메일은 필수값입니다.' });
   }
