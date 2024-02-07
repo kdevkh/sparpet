@@ -1,11 +1,86 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  M
+  F
+}
+
+model Users {
+  id            Int      @id @default(autoincrement()) @map("id")
+  clientId      String?  @db.VarChar(255)
+  email         String?  @unique @map("email")
+  password      String?  @map("password")
+  phone         String?  @map("phone")
+  gender        Gender   @map("gender")
+  birth         DateTime @map("birth")
+  name          String   @map("name")
+  profile_image String?  @map("profile_image")
+
+  createdAt  DateTime   @default(now()) @map("createdAt")
+  updatedAt  DateTime   @updatedAt @map("updatedAt")
+  posts      Posts[]
+  likes      Likes[]
+  comments   Comments[]
+  followedBy Follows[]  @relation("followedBy")
+  following  Follows[]  @relation("following")
+
+  @@map("Users")
+}
+
+model Posts {
+  id      Int    @id @default(autoincrement()) @map("id")
+  content String @map("content")
+  userId  Int    @map("userId")
+
+  user     Users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comments Comments[]
+  likes    Likes[]
+
+  @@map("Posts")
+}
+
+model Likes {
+  id        Int @id @default(autoincrement()) @map("id")
+  userId    Int @map("userId")
+  postId    Int @map("postId")
+  commentId Int @map("comentId")
+
+  user    Users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post    Posts    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment Comments @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@map("Likes")
+}
+
+model Comments {
+  id      Int    @id @default(autoincrement()) @map("id")
+  postId  Int    @map("postId")
+  userId  Int    @map("userId")
+  content String @map("content")
+
+  user  Users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post  Posts   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  likes Likes[]
+
+  @@map("Comments")
+}
+
+model Follows {
+  followedBy   Users @relation("followedBy", fields: [followedById], references: [id])
+  followedById Int   @map("followerId")
+  following    Users @relation("following", fields: [followingId], references: [id])
+  followingId  Int   @map("followingId")
+
+  createdAt DateTime @default(now()) @map("createdAt")
+  updatedAt DateTime @updatedAt @map("updatedAt")
+
+  @@id([followedById, followingId])
+  @@map("Follows")
 }
