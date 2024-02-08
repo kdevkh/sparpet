@@ -7,15 +7,17 @@ const ACCESS_TOKEN_SECRET_KEY = 'secretKey';
 
 const jwtValidate = async (req, res, next) => {
   try {
-    const authorization = req.headers.authorization;
-    if (!authorization) {
-      throw new Error('인증 정보가 틀렸습니다.');
-    }
+    // const authorization = req.headers.authorization;
+    // if (!authorization) {
+    //   throw new Error('인증 정보가 틀렸습니다.');
+    // }
 
-    const [tokenType, tokenValue] = authorization.split(' ');
-    if (tokenType !== 'Bearer') {
-      throw new Error('인증 정보가 틀렸습니다.');
-    }
+    // const [tokenType, tokenValue] = authorization.split(' ');
+    // if (tokenType !== 'Bearer') {
+    //   throw new Error('인증 정보가 틀렸습니다.');
+    // }
+    const tokenValue = req.cookies.accessToken;
+
     if (!tokenValue) {
       throw new Error('인증 정보가 틀렸습니다.');
     }

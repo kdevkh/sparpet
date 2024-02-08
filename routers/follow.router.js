@@ -1,14 +1,15 @@
 import express from 'express';
-import { prisma } from '../models/index.js';
+import { PrismaClient } from '@prisma/client';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
+const prisma = new PrismaClient();
 const router = express.Router();
 
 /** 팔로우 하기 */
 router.post('/:userId', jwtValidate, async (req, res, next) => {
   try {
     const followingUserId = req.params.userId; // B
-    const followedByUserId = req.user.userId; // A = me
+    const followedByUserId = res.locals.user.id; // A = me
 
     if (!followingUserId)
       return res
@@ -21,7 +22,7 @@ router.post('/:userId', jwtValidate, async (req, res, next) => {
         .json({ message: '자기자신을 팔로우할 수 없습니다.' });
     // 팔로우 할 user가 존재하는지 확인
     const followingUser = await prisma.users.findFirst({
-      where: { userId: +followingUserId },
+      where: { id: +followingUserId },
     });
     if (!followingUser)
       return res.status(404).json({ message: '존재하지 않는 사용자입니다.' });
@@ -52,7 +53,7 @@ router.post('/:userId', jwtValidate, async (req, res, next) => {
 router.delete('/:userId', jwtValidate, async (req, res, next) => {
   try {
     const followingUserId = req.params.userId; // B
-    const followedByUserId = req.user.userId; // A = me
+    const followedByUserId = res.locals.user.id; // A = me
 
     if (!followingUserId)
       return res
@@ -86,7 +87,7 @@ router.delete('/:userId', jwtValidate, async (req, res, next) => {
 /** 내가 팔로잉하는 유저 목록 조회 */
 router.get('/following', jwtValidate, async (req, res, next) => {
   try {
-    const followedByUserId = req.user.userId; // me
+    const followedByUserId = res.locals.user.id; // me
     const followingUsers = await prisma.users.findMany({
       where: {
         following: {
@@ -96,7 +97,7 @@ router.get('/following', jwtValidate, async (req, res, next) => {
         },
       },
       select: {
-        userId: true,
+        id: true,
         clientId: true,
         email: true,
       },
@@ -110,7 +111,7 @@ router.get('/following', jwtValidate, async (req, res, next) => {
 /** 내 팔로워 목록 조회 */
 router.get('/follower', jwtValidate, async (req, res, next) => {
   try {
-    const followingUserId = req.user.userId; // me
+    const followingUserId = res.locals.user.id; // me
     const followers = await prisma.users.findMany({
       where: {
         followedBy: {
@@ -120,7 +121,7 @@ router.get('/follower', jwtValidate, async (req, res, next) => {
         },
       },
       select: {
-        userId: true,
+        id: true,
         clientId: true,
         email: true,
       },
@@ -134,7 +135,7 @@ router.get('/follower', jwtValidate, async (req, res, next) => {
 
 /** 내가 팔로잉한 유저들의 게시물 목록 조회 */
 router.get('/following/posts', jwtValidate, async (req, res, next) => {
-  const followedByUserId = req.user.userId; // me
+  const followedByUserId = res.locals.user.id; // me
   let followingUsersIdList = await prisma.users.findMany({
     where: {
       following: {
@@ -144,13 +145,13 @@ router.get('/following/posts', jwtValidate, async (req, res, next) => {
       },
     },
     select: {
-      userId: true,
+      id: true,
     },
   });
 
   if (followingUsersIdList.length == 0)
     return res.status(404).json({ message: '게시물이 없습니다.' });
-  followingUsersIdList = followingUsersIdList.map((v) => v.userId);
+  followingUsersIdList = followingUsersIdList.map((v) => v.id);
 
   const posts = await prisma.posts.findMany({
     where: {

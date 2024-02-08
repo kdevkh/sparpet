@@ -16,6 +16,7 @@ app.use(cookieParser());
 app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter, commentRouter);
+app.use('/follow', followRouter);
 
 app.listen(PORT, () => {
   console.log(`sparpet app listening on port ${PORT}`);
