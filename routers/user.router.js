@@ -1,12 +1,11 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
+import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
 const prisma = new PrismaClient();
 const router = express.Router();
-
-const ACCESS_TOKEN_SECRET_KEY = 'secretKey';
 
 // 회원가입
 router.post('/sign-up', async (req, res, next) => {
@@ -58,7 +57,7 @@ router.post('/sign-up', async (req, res, next) => {
   await prisma.users.create({
     data: {
       email,
-      password,
+      password: sha256(password).toString(),
       name,
       phone,
       gender,
@@ -81,15 +80,21 @@ router.post('/sign-in', async (req, res, next) => {
   }
 
   const user = await prisma.users.findFirst({
-    where: { email, password },
+    where: {
+      email,
+      password: sha256(password).toString(),
+    },
   });
   if (!user) {
     return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
   }
-  const accessToken = jwt.sign({ userId: user.id }, ACCESS_TOKEN_SECRET_KEY, {
+  const accessToken = jwt.sign({ userId: user.id }, 'secretKey', {
     expiresIn: '12h',
   });
-  return res.json({ accessToken });
+  const refreshToken = jwt.sign({ userId: user.id }, 'refreshKey', {
+    expiresIn: '7d',
+  });
+  return res.json({ accessToken, refreshToken });
 });
 
 // 내 정보 조회
@@ -97,8 +102,12 @@ router.get('/profile', jwtValidate, (req, res, next) => {
   const user = res.locals.user;
 
   return res.json({
+    profileImage: user.profileImage,
     email: user.email,
     name: user.name,
+    phone: user.phone,
+    gender: user.gender,
+    birth: user.birth,
   });
 });
 

@@ -20,7 +20,7 @@ const jwtValidate = async (req, res, next) => {
       throw new Error('인증 정보가 틀렸습니다.');
     }
 
-    const token = jwt.verify(tokenValue, ACCESS_TOKEN_SECRET_KEY);
+    const token = jwt.verify(tokenValue, 'secretKey');
     if (!token.userId) {
       throw new Error('인증 정보가 틀렸습니다.');
     }
