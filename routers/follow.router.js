@@ -1,11 +1,11 @@
 import express from 'express';
 import { prisma } from '../models/index.js';
-import authMiddleware from '../middlewares/auth.middleware.js';
+import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
 const router = express.Router();
 
 /** 팔로우 하기 */
-router.post('/:userId', authMiddleware, async (req, res, next) => {
+router.post('/:userId', jwtValidate, async (req, res, next) => {
   try {
     const followingUserId = req.params.userId; // B
     const followedByUserId = req.user.userId; // A = me
@@ -49,7 +49,7 @@ router.post('/:userId', authMiddleware, async (req, res, next) => {
 });
 
 /** 언팔로우 하기 */
-router.delete('/:userId', authMiddleware, async (req, res, next) => {
+router.delete('/:userId', jwtValidate, async (req, res, next) => {
   try {
     const followingUserId = req.params.userId; // B
     const followedByUserId = req.user.userId; // A = me
@@ -84,7 +84,7 @@ router.delete('/:userId', authMiddleware, async (req, res, next) => {
 });
 
 /** 내가 팔로잉하는 유저 목록 조회 */
-router.get('/following', authMiddleware, async (req, res, next) => {
+router.get('/following', jwtValidate, async (req, res, next) => {
   try {
     const followedByUserId = req.user.userId; // me
     const followingUsers = await prisma.users.findMany({
@@ -108,7 +108,7 @@ router.get('/following', authMiddleware, async (req, res, next) => {
 });
 
 /** 내 팔로워 목록 조회 */
-router.get('/follower', authMiddleware, async (req, res, next) => {
+router.get('/follower', jwtValidate, async (req, res, next) => {
   try {
     const followingUserId = req.user.userId; // me
     const followers = await prisma.users.findMany({
@@ -133,7 +133,7 @@ router.get('/follower', authMiddleware, async (req, res, next) => {
 });
 
 /** 내가 팔로잉한 유저들의 게시물 목록 조회 */
-router.get('/following/posts', authMiddleware, async (req, res, next) => {
+router.get('/following/posts', jwtValidate, async (req, res, next) => {
   const followedByUserId = req.user.userId; // me
   let followingUsersIdList = await prisma.users.findMany({
     where: {
