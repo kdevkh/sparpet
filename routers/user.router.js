@@ -94,6 +94,10 @@ router.post('/sign-in', async (req, res, next) => {
   const refreshToken = jwt.sign({ userId: user.id }, 'refreshKey', {
     expiresIn: '7d',
   });
+  // 쿠키에 저장
+  res.cookie('accessToken', accessToken);
+  res.cookie('refreshToken', refreshToken);
+
   return res.json({ accessToken, refreshToken });
 });
 
