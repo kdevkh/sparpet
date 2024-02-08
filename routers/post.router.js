@@ -1,6 +1,5 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
 const prisma = new PrismaClient();
@@ -142,7 +141,7 @@ router.patch('/:postId', jwtValidate, async (req, res, next) => {
   if (post.userId !== user.id) {
     return res.status(400).json({
       success: false,
-      message: '올바르지 않은 요청입니다.',
+      message: '게시글 수정 권한이 없습니다.',
     });
   }
 
@@ -159,6 +158,7 @@ router.patch('/:postId', jwtValidate, async (req, res, next) => {
   return res.status(201).end();
 });
 
+// 게시글 삭제
 router.delete('/:postId', jwtValidate, async (req, res, next) => {
   const user = res.locals.user;
   const postId = req.params.postId;
