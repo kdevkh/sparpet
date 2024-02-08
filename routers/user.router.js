@@ -150,6 +150,13 @@ router.post('/sign-in', async (req, res, next) => {
   return res.json({ accessToken, refreshToken });
 });
 
+// 로그아웃
+router.post('/sign-out', async (req, res, next) => {
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
+  return res.json({ message: '로그아웃 되었습니다.' });
+});
+
 // 내 정보 조회
 router.get('/profile', jwtValidate, async (req, res, next) => {
   const user = res.locals.user;
