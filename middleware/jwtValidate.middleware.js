@@ -3,8 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-const ACCESS_TOKEN_SECRET_KEY = 'secretKey';
-
 const jwtValidate = async (req, res, next) => {
   try {
     // const authorization = req.headers.authorization;

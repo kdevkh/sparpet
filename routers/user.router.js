@@ -176,4 +176,57 @@ router.get('/profile', jwtValidate, async (req, res, next) => {
   });
 });
 
+// 내 정보 수정
+router.patch('/profile', jwtValidate, async (req, res, next) => {
+  const userId = res.locals.user.id;
+  const {
+    profileImage,
+    name,
+    phone,
+    gender,
+    birth,
+    newPassword,
+    newPasswordConfirm,
+  } = req.body;
+
+  if (
+    !profileImage &&
+    !name &&
+    !phone &&
+    !gender &&
+    !birth &&
+    !newPassword &&
+    !newPasswordConfirm
+  ) {
+    return res.status(400).json({ message: '수정할 정보를 입력해주세요.' });
+  }
+
+  if (newPassword !== newPasswordConfirm) {
+    return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+  }
+
+  const user = await prisma.users.findFirst({
+    where: { id: userId },
+  });
+  if (!user) {
+    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+  }
+
+  const hashedNewPassword = sha256(newPassword).toString();
+
+  await prisma.users.update({
+    where: { id: userId },
+    data: {
+      profileImage,
+      name,
+      phone,
+      gender,
+      birth,
+      password: hashedNewPassword,
+    },
+  });
+
+  return res.json({ message: '사용자 정보가 업데이트되었습니다.' });
+});
+
 export default router;
