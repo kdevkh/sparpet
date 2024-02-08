@@ -4,70 +4,119 @@ import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
+import multer from 'multer';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
+import crypto from 'crypto';
+import sharp from 'sharp';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+const bucketName = process.env.BUCKET_NAME;
+const bucketRegion = process.env.BUCKET_REGION;
+const accessKey = process.env.AWS_ACCESS_KEY;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+const s3 = new S3Client({
+  credentials: {
+    accessKeyId: accessKey,
+    secretAccessKey: secretAccessKey,
+  },
+  region: bucketRegion,
+});
+
+// multer
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 const prisma = new PrismaClient();
 const router = express.Router();
 
+/** 랜덤 문자열 생성 함수 for 'unique' imageName to put in s3 bucket */
+const randomImageName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString('hex');
+
 // 회원가입
-router.post('/sign-up', async (req, res, next) => {
-  const {
-    email,
-    password,
-    passwordConfirm,
-    name,
-    phone,
-    gender,
-    birth,
-    profileImage,
-  } = req.body;
-  if (!email) {
-    return res.status(400).json({ message: '이메일은 필수값입니다.' });
-  }
-  if (!password) {
-    return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
-  }
-  if (!passwordConfirm) {
-    return res.status(400).json({ message: '비밀번호 확인은 필수값입니다.' });
-  }
-  if (password.email < 6) {
-    return res.status(400).json({ message: '비밀번호는 최소 6자 이상입니다.' });
-  }
-  if (password !== passwordConfirm) {
-    return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
-  }
-  if (!name) {
-    return res.status(400).json({ message: '이름은 필수값입니다.' });
-  }
-  if (!gender) {
-    return res.status(400).json({ message: '성별을 입력해주세요.' });
-  }
-  if (!birth) {
-    return res.status(400).json({ message: '생년월일을 입력해주세요.' });
-  }
+router.post(
+  '/sign-up',
+  upload.single('profileImage'),
+  async (req, res, next) => {
+    const { email, password, passwordConfirm, name, phone, gender, birth } =
+      req.body;
+    if (!email) {
+      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+    }
+    if (!password) {
+      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+    }
+    if (!passwordConfirm) {
+      return res.status(400).json({ message: '비밀번호 확인은 필수값입니다.' });
+    }
+    if (password.email < 6) {
+      return res
+        .status(400)
+        .json({ message: '비밀번호는 최소 6자 이상입니다.' });
+    }
+    if (password !== passwordConfirm) {
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+    if (!name) {
+      return res.status(400).json({ message: '이름은 필수값입니다.' });
+    }
+    if (!gender) {
+      return res.status(400).json({ message: '성별을 입력해주세요.' });
+    }
+    if (!birth) {
+      return res.status(400).json({ message: '생년월일을 입력해주세요.' });
+    }
 
-  const user = await prisma.users.findFirst({
-    where: {
-      email,
-    },
-  });
-  if (user) {
-    return res
-      .status(400)
-      .json({ success: false, message: '사용할 수 없는 이메일입니다.' });
-  }
-  await prisma.users.create({
-    data: {
-      email,
-      password: sha256(password).toString(),
-      name,
-      phone,
-      gender,
-      birth,
-      profileImage,
-    },
-  });
+    const user = await prisma.users.findFirst({
+      where: {
+        email,
+      },
+    });
+    if (user) {
+      return res
+        .status(400)
+        .json({ success: false, message: '사용할 수 없는 이메일입니다.' });
+    }
 
-  return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
-});
+    // profileImage가 req에 존재하면,
+    const imageName = randomImageName();
+    if (req.file) {
+      // s3에 저장
+      // 그 전에 320x320px로 리사이징
+      const imageBuffer = await sharp(req.file.buffer)
+        .resize({ height: 320, width: 320, fit: 'contain' })
+        .toBuffer();
+      const params = {
+        Bucket: bucketName,
+        Key: imageName,
+        Body: imageBuffer,
+        ContentType: req.file.mimetype,
+      };
+      const command = new PutObjectCommand(params);
+      await s3.send(command); // command를 s3으로 보낸다.
+    }
+
+    await prisma.users.create({
+      data: {
+        email,
+        password: sha256(password).toString(),
+        name,
+        phone,
+        gender,
+        birth,
+        profileImage: imageName,
+      },
+    });
+
+    return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
+  }
+);
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
@@ -102,8 +151,19 @@ router.post('/sign-in', async (req, res, next) => {
 });
 
 // 내 정보 조회
-router.get('/profile', jwtValidate, (req, res, next) => {
+router.get('/profile', jwtValidate, async (req, res, next) => {
   const user = res.locals.user;
+
+  let imageUrl = '';
+  if (user.profileImage) {
+    // s3에서 image 이름으로 사용자가 해당 이미지에 액세스할 수 있는 한시적인 url 생성
+    const getObjectParams = {
+      Bucket: bucketName,
+      Key: user.profileImage,
+    };
+    const command = new GetObjectCommand(getObjectParams);
+    imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
+  }
 
   return res.json({
     profileImage: user.profileImage,
@@ -112,6 +172,7 @@ router.get('/profile', jwtValidate, (req, res, next) => {
     phone: user.phone,
     gender: user.gender,
     birth: user.birth,
+    profileImageUrl: imageUrl,
   });
 });
 

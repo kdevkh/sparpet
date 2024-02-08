@@ -35,7 +35,7 @@ const jwtValidate = async (req, res, next) => {
     }
 
     res.locals.user = user;
-    console.log(user);
+    //console.log(user);
 
     next();
   } catch (err) {
