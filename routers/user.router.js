@@ -1,7 +1,13 @@
 import express from 'express';
+import passport from 'passport';
+import session from 'express-session';
+import { Strategy as naverStrategy } from 'passport-naver';
 import { PrismaClient } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const prisma = new PrismaClient();
 const router = express.Router();
@@ -101,5 +107,75 @@ router.get('/profile', jwtValidate, (req, res, next) => {
     name: user.name,
   });
 });
+
+// naver 로그인 연동
+
+const clientID = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+const callbackURL = process.env.CALLBACK_URL
+
+passport.use(new naverStrategy({
+  clientID,
+  clientSecret,
+  callbackURL
+}, async (accessToken, refreshToken, profile, done) => {
+  try{  
+    const naverId = profile.id;
+    const naverEmail = profile.email[0].value;
+    const naverDisplayName = profile.displayname;
+    // const provider = 'naver',
+    // const naver = profile._json
+  
+  const newUser = await prisma.users.create({
+    data: {
+      userId: naverId,
+      email: naverEmail,
+      name: naverDisplayName,
+    }
+  });
+  
+  done(null, newUser);
+
+  } catch (error){
+    console.error('Error creating user: ', error);
+    done(error, null);
+  }
+
+  passport.serializeUser(function(user, done) {
+    done(null, user);
+  });
+  
+  passport.deserializeUser(function(req, user, done) {
+    req.session.sid = user.name;
+    console.log("Session Check" +req.session.sid);
+    done(null, user);
+  });
+
+}));
+// function(accessToken, refreshToken, profile, done) {
+//   console.log("naver profile", accessToken, refreshToken, profile);
+//   User.findOne({
+//       'naver.id': profile.id
+//   }, function(err, user) {
+//       if (!user) {
+//           user = new user({
+//               name: profile.displayName,
+//               email: profile.emails[0].value,
+//               username: profile.displayName,
+//               provider: 'naver',
+//               naver: profile._json
+//           });
+//           user.save(function(err) {
+//               if (err) console.log(err);
+//               return done(err, user);
+//           });
+//       } else {
+//           return done(err, user);
+//       }
+//   });
+// }
+// ));
+
+
 
 export default router;
