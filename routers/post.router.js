@@ -82,7 +82,6 @@ router.get('/:postId', async (req, res, next) => {
 // 게시글 생성
 router.post('/', jwtValidate, async (req, res, next) => {
   const user = res.locals.user;
-  console.log(user);
   const { title, content } = req.body;
   if (!title) {
     return res.status(400).json({
@@ -104,6 +103,94 @@ router.post('/', jwtValidate, async (req, res, next) => {
     },
   });
   return res.status(201).json({});
+});
+
+// 게시글 수정
+router.patch('/:postId', jwtValidate, async (req, res, next) => {
+  const user = res.locals.user;
+  const postId = req.params.postId;
+  const { title, content } = req.body;
+
+  if (!postId) {
+    return res.status(400).json({
+      success: false,
+      message: 'postId는 필수값입니다.',
+    });
+  }
+  if (!title) {
+    return res.status(400).json({
+      success: false,
+      message: '제목은 필수값입니다.',
+    });
+  }
+  if (!content) {
+    return res.status(400).json({
+      success: false,
+      message: '내용을 입력해주세요.',
+    });
+  }
+
+  const post = await prisma.posts.findFirst({
+    where: { id: Number(postId) },
+  });
+  if (!post) {
+    return res.status(400).json({
+      success: false,
+      message: '게시글이 존재하지 않습니다.',
+    });
+  }
+  if (post.userId !== user.id) {
+    return res.status(400).json({
+      success: false,
+      message: '올바르지 않은 요청입니다.',
+    });
+  }
+
+  await prisma.posts.update({
+    where: {
+      id: Number(postId),
+    },
+    data: {
+      title,
+      content,
+    },
+  });
+
+  return res.status(201).end();
+});
+
+router.delete('/:postId', jwtValidate, async (req, res, next) => {
+  const user = res.locals.user;
+  const postId = req.params.postId;
+
+  if (!postId) {
+    return res.status(400).json({
+      success: false,
+      message: 'postId는 필수값입니다.',
+    });
+  }
+
+  const post = await prisma.posts.findFirst({
+    where: { id: Number(postId) },
+  });
+  if (!post) {
+    return res.status(400).json({
+      success: false,
+      message: '게시글이 존재하지 않습니다.',
+    });
+  }
+  if (post.userId !== user.id) {
+    return res.status(400).json({
+      success: false,
+      message: '올바르지 않은 요청입니다.',
+    });
+  }
+
+  await prisma.posts.delete({
+    where: { id: Number(postId) },
+  });
+
+  return res.status(201).end();
 });
 
 export default router;
