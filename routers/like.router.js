@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 // 게시물 좋아요
-router.post('/:postId/like', jwtValidate, async (req,res,next) => {
+router.post('/post/:postId', jwtValidate, async (req,res,next) => {
     const id = req.params.postId;
     const user = res.locals.user;
 
@@ -42,7 +42,7 @@ router.post('/:postId/like', jwtValidate, async (req,res,next) => {
 })
 
 // 게시물에 좋아요 취소
-router.delete('/:postId/like', jwtValidate, async (req,res,next) => {
+router.delete('/post/:postId/like', jwtValidate, async (req,res,next) => {
     const postId = req.params;
     const user = res.locals.user;
 
@@ -71,21 +71,18 @@ router.delete('/:postId/like', jwtValidate, async (req,res,next) => {
 })
 
 // 좋아요 누른 게시물 조회
-router.get('/like', jwtValidate, async (req,res,next) => {
+router.get('/posts', jwtValidate, async (req,res,next) => {
     const user = res.locals.user;
 
     const likes = await prisma.Likes.findMany({
         where : {
             userId : user.id
-        }, 
-        orderBy : {
-            createdAt : 'desc'
         }
     });
 
     const posts = await prisma.posts.findMany({
         where : {
-            postId : {in : likes.map((like) => like.postId)}
+            id : {in : likes.map((like) => like.postId)}
         }
     });
 
