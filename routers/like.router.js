@@ -8,15 +8,15 @@ const router = express.Router();
 
 // 게시물 좋아요
 router.post('/post/:postId', jwtValidate, async (req,res,next) => {
-    const id = req.params.postId;
+    const postId = req.params.postId;
     const user = res.locals.user;
 
-    const post = await prisma.posts.findFirst({where : { id : +id}})
+    const post = await prisma.posts.findFirst({where : { id : +postId}})
     if (!post) {
         return res.status(404).json({ message: "이력서 조회에 실패하였습니다." });
     }
 
-    const duplication = await prisma.Likes.findFirst({where : {userId : user.id, postId : +id}})
+    const duplication = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}})
     if (duplication) {
         return res.status(409).json({ message : "이미 좋아요를 누른 게시물입니다." })
     }
@@ -25,7 +25,7 @@ router.post('/post/:postId', jwtValidate, async (req,res,next) => {
     const like = await prisma.likes.create({
         data : {
             userId : userId,
-            postId : +id
+            postId : +postId
         }
     })
 
@@ -42,16 +42,16 @@ router.post('/post/:postId', jwtValidate, async (req,res,next) => {
 })
 
 // 게시물에 좋아요 취소
-router.delete('/post/:postId/like', jwtValidate, async (req,res,next) => {
-    const postId = req.params;
+router.delete('/post/:postId', jwtValidate, async (req,res,next) => {
+    const postId = req.params.postId;
     const user = res.locals.user;
 
-    const post = await prisma.posts.findFirst({where : { id : postId}})
+    const post = await prisma.posts.findFirst({where : { id : +postId}})
     if (!post) {
         return res.status(404).json({ message: "이력서 조회에 실패하였습니다." });
     }
 
-    const likePost = await prisma.Likes.findFirst({where : {userId : user.id, postId : postId}});
+    const likePost = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}});
     if (!likePost) {
         return res.status(404).json({ message: "해당 게시물에 좋아요를 누른적이 없습니다." });
     }
