@@ -13,18 +13,17 @@ router.post('/post/:postId', jwtValidate, async (req,res,next) => {
 
     const post = await prisma.posts.findFirst({where : { id : +postId}})
     if (!post) {
-        return res.status(404).json({ message: "이력서 조회에 실패하였습니다." });
+        return res.status(404).json({ message: "게시물 조회에 실패하였습니다." });
     }
 
     const duplication = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}})
     if (duplication) {
         return res.status(409).json({ message : "이미 좋아요를 누른 게시물입니다." })
     }
-    const userId = user.id;
 
     const like = await prisma.likes.create({
         data : {
-            userId : userId,
+            userId : user.id,
             postId : +postId
         }
     })
@@ -91,6 +90,47 @@ router.get('/posts', jwtValidate, async (req,res,next) => {
     }
 
     return res.status(200).json({posts});
+})
+
+// 댓글 좋아요
+router.post('/post/:postId/comment/:commentId', jwtValidate, async (req,res,next) => {
+    const postId = req.params.postId;
+    const commentId = req.params.commentId;
+    const user = res.locals.user;
+
+    const post = await prisma.posts.findFirst({where: {id : +postId}});
+    if (!post) {
+        return res.status(404).json({ message: "게시물 조회에 실패하였습니다." });
+    }
+
+    const comment = await prisma.comments.findFirst({where: {id: +commentId, postId: +postId}})
+    if (!comment) {
+        return res.status(404).json({ message: "댓글 조회에 실패하였습니다." });
+    }
+
+    const duplication = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId, commentId: +commentId}})
+    if (duplication) {
+        return res.status(409).json({ message : "이미 좋아요를 누른 댓글입니다." })
+    }
+
+    const like = await prisma.likes.create({
+        data : {
+            userId : user.id,
+            postId : +postId,
+            commentId : +commentId
+        }
+    })
+
+    await prisma.Comments.update({
+        where : comment,
+        data : {
+            countlike : {
+                increment: 1
+            }
+        }
+    })
+
+    return res.status(201).json({message : "좋아요 성공"});
 })
 
 export default router;
