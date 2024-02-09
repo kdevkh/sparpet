@@ -50,12 +50,12 @@ router.delete('/post/:postId', jwtValidate, async (req,res,next) => {
         return res.status(404).json({ message: "게시물 조회에 실패하였습니다." });
     }
 
-    const likePost = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}});
-    if (!likePost) {
+    const dontlikePost = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}});
+    if (!dontlikePost) {
         return res.status(404).json({ message: "해당 게시물에 좋아요를 누른적이 없습니다." });
     }
 
-    await prisma.Likes.delete({where : likePost})
+    await prisma.Likes.delete({where : dontlikePost})
 
     await prisma.posts.update({
         where : post,
@@ -147,12 +147,12 @@ router.delete('/post/:postId/comment/:commentId', jwtValidate, async (req,res,ne
         return res.status(404).json({ message: "댓글 조회에 실패하였습니다." });
     }
 
-    const likecomment = await prisma.Likes.findFirst({where : {userId: user.id, postId: +postId, commentId: +commentId}});
-    if (!likecomment) {
+    const dontlikeComment = await prisma.Likes.findFirst({where : {userId: user.id, postId: +postId, commentId: +commentId}});
+    if (!dontlikeComment) {
         return res.status(404).json({ message: "해당 게시물에 좋아요를 누른적이 없습니다." });
     }
 
-    await prisma.Likes.delete({where : likecomment})
+    await prisma.Likes.delete({where : dontlikeComment})
 
     await prisma.comments.update({
         where : comment,
