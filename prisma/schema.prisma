@@ -39,6 +39,7 @@ model Posts {
   title     String   @map("title")
   content   String   @map("content") @db.Text
   userId    Int      @map("userId")
+  countlike Int      @default(0) @map("countlike")
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 
@@ -53,11 +54,11 @@ model Likes {
   id        Int @id @default(autoincrement()) @map("id")
   userId    Int @map("userId")
   postId    Int @map("postId")
-  commentId Int @map("comentId")
+  commentId Int? @map("comentId")
 
-  user    Users    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  post    Posts    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  comment Comments @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user    Users?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  post    Posts?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  comment Comments? @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@map("Likes")
 }
@@ -67,6 +68,7 @@ model Comments {
   postId    Int      @map("postId")
   userId    Int      @map("userId")
   content   String   @map("content") @db.Text
+  
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
 

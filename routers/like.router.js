@@ -10,7 +10,6 @@ const router = express.Router();
 router.post('/:postId/like', jwtValidate, async (req,res,next) => {
     const id = req.params.postId;
     const user = res.locals.user;
-    console.log(user);
 
     const post = await prisma.posts.findFirst({where : { id : +id}})
     if (!post) {
@@ -21,10 +20,11 @@ router.post('/:postId/like', jwtValidate, async (req,res,next) => {
     if (duplication) {
         return res.status(409).json({ message : "이미 좋아요를 누른 게시물입니다." })
     }
+    const userId = user.id;
 
-    const like = await prisma.Likes.create({
+    const like = await prisma.likes.create({
         data : {
-            userId : user.id,
+            userId : userId,
             postId : +id
         }
     })

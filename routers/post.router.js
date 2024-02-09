@@ -33,6 +33,7 @@ router.get('/', async (req, res, next) => {
           name: true,
         },
       },
+      countlike: true,
       createdAt: true,
     },
     orderBy: [
