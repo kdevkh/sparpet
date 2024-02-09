@@ -47,7 +47,7 @@ router.delete('/post/:postId', jwtValidate, async (req,res,next) => {
 
     const post = await prisma.posts.findFirst({where : { id : +postId}})
     if (!post) {
-        return res.status(404).json({ message: "이력서 조회에 실패하였습니다." });
+        return res.status(404).json({ message: "게시물 조회에 실패하였습니다." });
     }
 
     const likePost = await prisma.Likes.findFirst({where : {userId : user.id, postId : +postId}});
@@ -94,8 +94,7 @@ router.get('/posts', jwtValidate, async (req,res,next) => {
 
 // 댓글 좋아요
 router.post('/post/:postId/comment/:commentId', jwtValidate, async (req,res,next) => {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
+    const { postId, commentId } = req.params;
     const user = res.locals.user;
 
     const post = await prisma.posts.findFirst({where: {id : +postId}});
@@ -131,6 +130,40 @@ router.post('/post/:postId/comment/:commentId', jwtValidate, async (req,res,next
     })
 
     return res.status(201).json({message : "좋아요 성공"});
+})
+
+// 댓글에 좋아요 취소
+router.delete('/post/:postId/comment/:commentId', jwtValidate, async (req,res,next) => {
+    const { postId, commentId } = req.params;
+    const user = res.locals.user;
+
+    const post = await prisma.posts.findFirst({where : { id : +postId}})
+    if (!post) {
+        return res.status(404).json({ message: "게시물 조회에 실패하였습니다." });
+    }
+
+    const comment = await prisma.comments.findFirst({where: {id: +commentId, postId: +postId}})
+    if (!comment) {
+        return res.status(404).json({ message: "댓글 조회에 실패하였습니다." });
+    }
+
+    const likecomment = await prisma.Likes.findFirst({where : {userId: user.id, postId: +postId, commentId: +commentId}});
+    if (!likecomment) {
+        return res.status(404).json({ message: "해당 게시물에 좋아요를 누른적이 없습니다." });
+    }
+
+    await prisma.Likes.delete({where : likecomment})
+
+    await prisma.comments.update({
+        where : comment,
+        data : {
+            countlike : {
+                decrement: 1
+            }
+        }
+    })
+
+    return res.status(200).json({ message: "좋아요 취소" });
 })
 
 export default router;
