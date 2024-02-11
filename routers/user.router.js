@@ -155,7 +155,6 @@ router.post('/sign-in', async (req, res, next) => {
 router.get('/profile', jwtValidate, async (req, res, next) => {
   const user = res.locals.user;
 
-  console.log(user);
   let imageUrl = '';
   if (user.profileImage) {
     // s3에서 image 이름으로 사용자가 해당 이미지에 액세스할 수 있는 한시적인 url 생성
