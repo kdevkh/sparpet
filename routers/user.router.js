@@ -147,7 +147,7 @@ router.post('/sign-in', async (req, res, next) => {
   res.cookie('accessToken', accessToken);
   res.cookie('refreshToken', refreshToken);
 
-  return res.json({ accessToken, refreshToken });
+  return res.json({ message: '로그인 성공' });
 });
 
 // 로그아웃

@@ -6,6 +6,9 @@ import userRouter from './routers/user.router.js';
 import postRouter from './routers/post.router.js';
 import commentRouter from './routers/comment.router.js';
 import followRouter from './routers/follow.router.js';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
