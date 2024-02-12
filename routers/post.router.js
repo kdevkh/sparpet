@@ -5,6 +5,34 @@ import jwtValidate from '../middleware/jwtValidate.middleware.js';
 const prisma = new PrismaClient();
 const router = express.Router();
 
+/** 내가 팔로잉한 유저들의 게시물 목록 조회 */
+router.get('/following', jwtValidate, async (req, res, next) => {
+  const followedByUserId = res.locals.user.id; // me
+  let followingUsersIdList = await prisma.users.findMany({
+    where: {
+      following: {
+        some: {
+          followedById: +followedByUserId,
+        },
+      },
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (followingUsersIdList.length == 0)
+    return res.status(404).json({ message: '게시물이 없습니다.' });
+  followingUsersIdList = followingUsersIdList.map((v) => v.id);
+
+  const posts = await prisma.posts.findMany({
+    where: {
+      userId: { in: followingUsersIdList },
+    },
+  });
+  return res.status(200).json({ posts });
+});
+
 // 게시글 목록 조회
 router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
@@ -66,6 +94,7 @@ router.get('/:postId', async (req, res, next) => {
       user: {
         select: {
           name: true,
+          id: true,
         },
       },
       createdAt: true,
@@ -191,6 +220,54 @@ router.delete('/:postId', jwtValidate, async (req, res, next) => {
   });
 
   return res.status(201).end();
+});
+
+// 팔로우 & 언팔로우
+router.post('/:postId/follow', jwtValidate, async (req, res, next) => {
+  try {
+    const followingUser = await prisma.posts.findFirst({
+      where: { id: +req.params.postId },
+      select: { userId: true },
+    }); // B
+    const followingUserId = followingUser.userId;
+    if (!followingUserId)
+      return res.status(404).json({ message: '존재하지 않는 게시물입니다.' });
+
+    const followedByUserId = res.locals.user.id; // A = me
+    // 자기자신 팔로우 불가
+    if (followingUserId == followedByUserId)
+      return res
+        .status(400)
+        .json({ message: '자기자신을 팔로우할 수 없습니다.' });
+
+    // 이미 팔로우한 user인지 확인 -> 언팔로우
+    const isExistfollowingUser = await prisma.follows.findMany({
+      where: {
+        followedById: +followedByUserId,
+        followingId: +followingUserId,
+      },
+    });
+    if (isExistfollowingUser.length !== 0) {
+      await prisma.follows.deleteMany({
+        where: {
+          followedById: +followedByUserId,
+          followingId: +followingUserId,
+        },
+      });
+      return res.status(201).json({ message: '언팔로우 성공' });
+    }
+
+    // A가 B를 팔로우
+    const followUsers = await prisma.follows.create({
+      data: {
+        followingId: +followingUserId,
+        followedById: +followedByUserId,
+      },
+    });
+    return res.status(201).json({ message: '팔로우 성공', followUsers });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
