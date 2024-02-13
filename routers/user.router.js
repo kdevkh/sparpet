@@ -6,28 +6,80 @@ import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
 import multer from 'multer';
 import {
-  S3Client,
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
-import crypto from 'crypto';
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import 'dotenv/config'
+import { s3, randomName, bucketName } from '../utils/aws.js';
+import passport from 'passport';
+import { Strategy as naverStrategy } from 'passport-naver';
+import dotenv from 'dotenv';
 
-const bucketName = process.env.BUCKET_NAME;
-const bucketRegion = process.env.BUCKET_REGION;
-const accessKey = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+dotenv.config();
 
-const s3 = new S3Client({
-  credentials: {
-    accessKeyId: accessKey,
-    secretAccessKey: secretAccessKey,
-  },
-  region: bucketRegion,
-});
+// passport-naver
+const clientID = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+const callbackURL = process.env.CALLBACK_URL;
+
+passport.use(
+  new naverStrategy(
+    {
+      clientID,
+      clientSecret,
+      callbackURL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(
+        'naverProfile',
+        'access',
+        accessToken,
+        're',
+        refreshToken,
+        profile
+      );
+      console.log(profile);
+      try {
+        const naverId = profile.id;
+        const naverEmail = profile.emails && profile.emails[0].value;
+        const naverDisplayName = profile.displayName;
+        const naverGender = profile.gender;
+        const naverBirth = profile.birthday;
+        const naverPhone = profile.phone;
+        // const provider = 'naver',
+        // const naver = profile._json
+
+        const newUser = await prisma.users.create({
+          data: {
+            clientId: naverId,
+            email: naverEmail,
+            name: naverDisplayName,
+            gender: naverGender,
+            birth: naverBirth,
+            phone: naverPhone,
+          },
+        });
+
+        done(null, newUser);
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+
+      passport.serializeUser(function (user, done) {
+        done(null, user);
+      });
+
+      passport.deserializeUser(function (req, user, done) {
+        req.session.sid = user.name;
+        console.log('Session Check' + req.session.sid);
+        done(null, user);
+      });
+    }
+  )
+);
 
 // multer
 const storage = multer.memoryStorage();
@@ -35,10 +87,6 @@ const upload = multer({ storage: storage });
 
 const prisma = new PrismaClient();
 const router = express.Router();
-
-/** 랜덤 문자열 생성 함수 for 'unique' imageName to put in s3 bucket */
-const randomImageName = (bytes = 32) =>
-  crypto.randomBytes(bytes).toString('hex');
 
 // 회원가입
 router.post(
@@ -86,7 +134,7 @@ router.post(
     }
 
     // profileImage가 req에 존재하면,
-    const imageName = randomImageName();
+    const imageName = randomName();
     if (req.file) {
       // s3에 저장
       // 그 전에 320x320px로 리사이징
@@ -121,23 +169,36 @@ router.post(
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ message: '이메일은 필수값입니다.' });
-  }
-  if (!password) {
-    return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+  const { clientId, email, password } = req.body;
+  let user;
+
+  if (clientId) {
+    user = await prisma.users.findFirst({
+      where: {
+        clientId,
+      },
+    });
+    if (!user)
+      return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+  } else{
+    if (!email) {
+      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+    }
+    if (!password) {
+      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+    }
+  
+    user = await prisma.users.findFirst({
+      where: {
+        email,
+        password: sha256(password).toString(),
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+    }
   }
 
-  const user = await prisma.users.findFirst({
-    where: {
-      email,
-      password: sha256(password).toString(),
-    },
-  });
-  if (!user) {
-    return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
-  }
   const accessToken = jwt.sign({ userId: user.id }, 'secretKey', {
     expiresIn: '12h',
   });
@@ -185,56 +246,143 @@ router.get('/profile', jwtValidate, async (req, res, next) => {
 });
 
 // 내 정보 수정
-router.patch('/profile', jwtValidate, async (req, res, next) => {
-  const userId = res.locals.user.id;
-  const {
-    profileImage,
-    name,
-    phone,
-    gender,
-    birth,
-    newPassword,
-    newPasswordConfirm,
-  } = req.body;
-
-  if (
-    !profileImage &&
-    !name &&
-    !phone &&
-    !gender &&
-    !birth &&
-    !newPassword &&
-    !newPasswordConfirm
-  ) {
-    return res.status(400).json({ message: '수정할 정보를 입력해주세요.' });
-  }
-
-  if (newPassword !== newPasswordConfirm) {
-    return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
-  }
-
-  const user = await prisma.users.findFirst({
-    where: { id: userId },
-  });
-  if (!user) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
-  }
-
-  const hashedNewPassword = sha256(newPassword).toString();
-
-  await prisma.users.update({
-    where: { id: userId },
-    data: {
+router.patch(
+  '/profile',
+  jwtValidate,
+  upload.single('profileImage'),
+  async (req, res, next) => {
+    const userId = res.locals.user.id;
+    const {
       profileImage,
       name,
       phone,
       gender,
       birth,
-      password: hashedNewPassword,
-    },
-  });
+      newPassword,
+      newPasswordConfirm,
+    } = req.body;
 
-  return res.json({ message: '사용자 정보가 업데이트되었습니다.' });
+    if (
+      !profileImage &&
+      !name &&
+      !phone &&
+      !gender &&
+      !birth &&
+      !newPassword &&
+      !newPasswordConfirm
+    ) {
+      return res.status(400).json({ message: '수정할 정보를 입력해주세요.' });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+
+    const user = await prisma.users.findFirst({
+      where: { id: userId },
+    });
+    if (!user) {
+      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+
+    const hashedNewPassword = sha256(newPassword).toString();
+
+    let imageName = user.profileImage;
+    // 사용자가 profileImage를 수정하려고 한다면,
+    if (req.file) {
+      let params, command;
+      // 만약 이미 profileImage가 존재했다면,
+      // s3에서 기존의 profileImage 저장된 것 삭제
+      if (imageName) {
+        params = {
+          Bucket: bucketName,
+          Key: imageName,
+        };
+        command = new DeleteObjectCommand(params);
+        await s3.send(command);
+      }
+      // s3에 저장
+      // 그 전에 320x320px로 리사이징
+      const imageBuffer = await sharp(req.file.buffer)
+        .resize({ height: 320, width: 320, fit: 'contain' })
+        .toBuffer();
+      imageName = randomName();
+      params = {
+        Bucket: bucketName,
+        Key: imageName,
+        Body: imageBuffer,
+        ContentType: req.file.mimetype,
+      };
+      command = new PutObjectCommand(params);
+      await s3.send(command); // command를 s3으로 보낸다.
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { id: userId },
+      data: {
+        profileImage: imageName,
+        name,
+        phone,
+        gender,
+        birth,
+        password: hashedNewPassword,
+      },
+    });
+
+    return res.json({
+      message: '사용자 정보가 업데이트되었습니다.',
+      data: updatedUser,
+    });
+  }
+);
+
+/** 내가 팔로잉하는 유저 목록 조회 */
+router.get('/following', jwtValidate, async (req, res, next) => {
+  try {
+    const followedByUserId = res.locals.user.id; // me
+    const followingUsers = await prisma.users.findMany({
+      where: {
+        following: {
+          some: {
+            followedById: +followedByUserId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        clientId: true,
+        email: true,
+      },
+    });
+    return res.status(200).json({ followingUsers });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** 내 팔로워 목록 조회*/
+router.get('/follower', jwtValidate, async (req, res, next) => {
+  try {
+    const followingUserId = res.locals.user.id; // me
+    const followers = await prisma.users.findMany({
+      where: {
+        followedBy: {
+          some: {
+            followingId: +followingUserId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        clientId: true,
+        email: true,
+      },
+    });
+
+    return res.status(200).json({ followers });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
