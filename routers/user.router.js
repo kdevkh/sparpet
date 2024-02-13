@@ -4,6 +4,8 @@ import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
+import dotenv from 'dotenv';
+
 import multer from 'multer';
 import {
   S3Client,
@@ -14,6 +16,10 @@ import {
 import crypto from 'crypto';
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+
+import nodemailer from 'nodemailer';
+
+dotenv.config();
 
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
@@ -39,13 +45,85 @@ const router = express.Router();
 const randomImageName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString('hex');
 
+// 회원가입 email 인증
+router.post('/sendcode', async (req, res, next) => {
+  const { email } = req.body;
+  const user = await prisma.users.findUnique({ where: { email } });
+
+  if (!user.isVerified) {
+    const verifyToken = createVerifyToken(user.email);
+    res.cookie('verification', `Bearer ${verifyToken}`);
+    await emailSender(email, verifyToken);
+    try {
+      res.json({
+        ok: true,
+        msg: '이메일이 성공적으로 전송되었습니다.',
+        token: verifyToken,
+      });
+    } catch (error) {
+      console.error('이메일 전송에 실패했습니다:', error);
+      res.status(500).json({ ok: false, msg: '이메일 전송에 실패했습니다.' });
+    }
+  } else {
+    res.status(400).json({ ok: false, msg: '이미 인증 완료된 이메일입니다.' });
+  }
+});
+
+//   // 인증번호 생성
+//   let generatedCode = function generateRandomCode() {
+//     const min = 100000;
+//     const max = 999999;
+//     return Math.floor(Math.random() * (max - min + 1)) + min;
+//   };
+
+//   const transporter = nodemailer.createTransport({
+//     service: 'gmail',
+//     auth: {
+//       user: 'nodejs.testermail@gmail.com',
+//       pass: 'lbyz etni yrts fndy',
+//     },
+//   });
+
+//   const mailOptions = {
+//     from: 'nodejs.testermail@gmail.com',
+//     to: email,
+//     subject: '스파르펫 회원가입 인증코드',
+//     text: `회원가입 인증 코드는 ${generatedCode}입니다`,
+//   };
+
+//   transporter.sendMail(mailOptions, (error, info) => {
+//     console.log('info', info);
+//     if (error) {
+//       res.json({
+//         success: false,
+//         message: ' 메일 전송에 실패하였습니다. ',
+//       });
+//       transporter.close();
+//       return;
+//     } else {
+//       res.json({ success: true, message: ' 메일 전송에 성공하였습니다. ' });
+//       transporter.close();
+//       return;
+//     }
+//   });
+// });
+
 // 회원가입
 router.post(
   '/sign-up',
   upload.single('profileImage'),
   async (req, res, next) => {
-    const { email, password, passwordConfirm, name, phone, gender, birth } =
-      req.body;
+    const {
+      email,
+      password,
+      passwordConfirm,
+      name,
+      phone,
+      gender,
+      birth,
+      // verificationCode,
+    } = req.body;
+
     if (!email) {
       return res.status(400).json({ message: '이메일은 필수값입니다.' });
     }
@@ -72,6 +150,11 @@ router.post(
     if (!birth) {
       return res.status(400).json({ message: '생년월일을 입력해주세요.' });
     }
+    // if (verificationCode !== generatedCode.toString()) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: '인증 코드가 올바르지 않습니다.' });
+    // }
 
     const user = await prisma.users.findFirst({
       where: {
