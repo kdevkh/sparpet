@@ -1,0 +1,53 @@
+<body>
+    <%- include('header.ejs') %>
+
+        <% if (data.length> 0) { %>
+            <div class="postcontainer">
+                <div>
+                    <a href="/post/create" class="newpost">새 글 작성하기</a>
+                    <div class="latest">최신순</div>
+                    <div class="likes">좋아요순</div>
+                    <div class="views">조회수순</div>
+                </div>
+                <div class="posts">
+                    <!-- <div id="post" class="post">
+                        <div id="photo" class="photo">
+                            <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+                        </div>
+                        <div id="content" class="content">
+                            <div id="title" class="title">제목</div>
+                            <div id="username" class="username">작성자</div>
+                            <div id="countlike" class="countlike"><i class="fa-solid fa-heart"></i></div>
+                            <div id="createdAt" class="createdAt">작성날짜</div>
+                        </div>
+                    </div> -->
+
+                    <% data.forEach(post=> { %>
+                        <div id="post" class="post"><a href='/posts/<%= post.id %>'>
+                            <div id="photo" class="photo">
+                                <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+                            </div>
+                            <div class="content">
+                                <div id="title" class="title"><%= post.title %>
+                                </div>
+                                <div id="username" class="username">작성자 : <%= post.user.name %>
+                                </div>
+                                <form class="form-box" action='/like/post/<%= post.id %>' method="POST">
+                                    <button id="countlike" class="countlike"><i class="fa-solid fa-heart"></i>
+                                        <%= post.countlike %>
+                                    </button>
+                                </form>
+                                <div id="createdAt" class="createdAt">작성날짜 : <%= post.createdAt %>
+                                </div>
+                                <div class="view">조회수 : <%= post.view %> </div>
+                            </div>
+                            </a>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        <% } else { %>
+            <p>게시글이 없습니다.</p>
+        <% } %>
+
+</body>

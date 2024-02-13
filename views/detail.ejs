@@ -1,0 +1,28 @@
+<body>
+
+    <%- include('header.ejs') %>
+        <div class="detail_post">
+            <div class="detail_photo">
+                <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+            </div>
+            <div class="detail_contents">
+                <div class="detail_title">
+                    <%= data.title %>
+                </div>
+                <div class="detail_username">작성자 : <%= data.user.name %>
+                </div>
+                <div class="detail_content">
+                    <%= data.content %>
+                </div>
+                <div class="detail_createdAt">
+                    <%= data.createdAt %>
+                </div>
+                <div class="detail_countlike"><i class="fa-solid fa-heart"></i>
+                    <%= data.countlike %>
+                </div>
+                <div class="detail_view">
+                    조회수 : <%= data.view %>
+                </div>
+            </div>
+        </div>
+</body>

@@ -7,59 +7,58 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Gender {
-  M
-  F
-}
-
 model Users {
-  id           Int      @id @default(autoincrement()) @map("id")
-  clientId     String?  @db.VarChar(255)
-  email        String?  @unique @map("email")
-  password     String?  @map("password")
-  phone        String?  @map("phone")
-  gender       Gender   @map("gender")
-  birth        String   @map("birth")
-  name         String   @map("name")
-  profileImage String?  @map("profileImage")
-  createdAt    DateTime @default(now()) @map("createdAt")
-  updatedAt    DateTime @updatedAt @map("updatedAt")
-
-  posts      Posts[]
-  likes      Likes[]
-  comments   Comments[]
-  followedBy Follows[]  @relation("followedBy")
-  following  Follows[]  @relation("following")
+  id           Int        @id @default(autoincrement()) @map("id")
+  clientId     String?    @db.VarChar(255)
+  email        String?    @unique @map("email")
+  password     String?    @map("password")
+  phone        String?    @map("phone")
+  gender       Gender?    @map("gender")
+  birth        String?    @map("birth")
+  name         String     @map("name")
+  profileImage String?    @map("profileImage")
+  createdAt    DateTime   @default(now()) @map("createdAt")
+  updatedAt    DateTime   @updatedAt @map("updatedAt")
+  comments     Comments[]
+  followedBy   Follows[]  @relation("followedBy")
+  following    Follows[]  @relation("following")
+  likes        Likes[]
+  posts        Posts[]
 
   @@map("Users")
 }
 
 model Posts {
-  id        Int      @id @default(autoincrement()) @map("id")
-  title     String   @map("title")
-  content   String   @map("content") @db.Text
-  userId    Int      @map("userId")
-  countlike Int      @default(0) @map("countlike")
-  createdAt DateTime @default(now()) @map("createdAt")
-  updatedAt DateTime @updatedAt @map("updatedAt")
+  id         Int        @id @default(autoincrement()) @map("id")
+  title      String     @map("title")
+  content    String     @map("content") @db.Text
+  userId     Int        @map("userId")
+  countlike  Int        @default(0) @map("countlike")
+  createdAt  DateTime   @default(now()) @map("createdAt")
+  updatedAt  DateTime   @updatedAt @map("updatedAt")
+  attachFile String?    @db.Text
+  view       Int        @default(0) @map("view")
 
-  user     Users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  comments Comments[]
-  likes    Likes[]
+  comments   Comments[]
+  likes      Likes[]
+  user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId], map: "Posts_userId_fkey")
   @@map("Posts")
 }
 
 model Likes {
-  id        Int @id @default(autoincrement()) @map("id")
-  userId    Int @map("userId")
-  postId    Int @map("postId")
-  commentId Int? @map("commentId")
+  id        Int       @id @default(autoincrement()) @map("id")
+  userId    Int       @map("userId")
+  postId    Int       @map("postId")
+  commentId Int?      @map("commentId")
+  comment   Comments? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  post      Posts     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user    Users?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  post    Posts?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  comment Comments? @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  @@index([commentId], map: "Likes_commentId_fkey")
+  @@index([postId], map: "Likes_postId_fkey")
+  @@index([userId], map: "Likes_userId_fkey")
   @@map("Likes")
 }
 
@@ -71,22 +70,29 @@ model Comments {
   countlike Int      @default(0) @map("countlike")
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
+  post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  likes     Likes[]
 
-  user  Users   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  post  Posts   @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  likes Likes[]
-
+  @@index([postId], map: "Comments_postId_fkey")
+  @@index([userId], map: "Comments_userId_fkey")
   @@map("Comments")
 }
 
 model Follows {
-  followedBy   Users    @relation("followedBy", fields: [followedById], references: [id])
   followedById Int      @map("followedById")
-  following    Users    @relation("following", fields: [followingId], references: [id])
   followingId  Int      @map("followingId")
   createdAt    DateTime @default(now()) @map("createdAt")
   updatedAt    DateTime @updatedAt @map("updatedAt")
+  followedBy   Users    @relation("followedBy", fields: [followedById], references: [id])
+  following    Users    @relation("following", fields: [followingId], references: [id])
 
   @@id([followedById, followingId])
+  @@index([followingId], map: "Follows_followingId_fkey")
   @@map("Follows")
+}
+
+enum Gender {
+  M
+  F
 }

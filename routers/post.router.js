@@ -35,6 +35,7 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
+      view : true
     },
     orderBy: [
       {
@@ -43,7 +44,7 @@ router.get('/', async (req, res, next) => {
     ],
   });
 
-  return res.json({ data: posts });
+  return res.render('main.ejs',{ data: posts });
 });
 
 // 게시글 상세 조회
@@ -55,6 +56,17 @@ router.get('/:postId', async (req, res, next) => {
       message: 'postId는 필수값입니다.',
     });
   }
+
+  await prisma.posts.update({
+    where: {
+      id: Number(postId)
+    },
+    data : {
+      view : {
+        increment : 1
+      }
+    }
+  })
 
   const post = await prisma.posts.findFirst({
     where: {
@@ -69,14 +81,16 @@ router.get('/:postId', async (req, res, next) => {
           name: true,
         },
       },
+      countlike: true,
       createdAt: true,
+      view : true,
     },
   });
   if (!post) {
     return res.json({ data: {} });
   }
 
-  return res.json({ data: post });
+  return res.render('detail.ejs',{ data: post });
 });
 
 // 게시글 생성
@@ -102,7 +116,7 @@ router.post('/', jwtValidate, async (req, res, next) => {
       userId: user.id,
     },
   });
-  return res.status(201).json({});
+  return res.status(201).render('postcreate.ejs');
 });
 
 // 게시글 수정
