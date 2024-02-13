@@ -14,6 +14,7 @@ import {
 import crypto from 'crypto';
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import 'dotenv/config'
 
 const bucketName = process.env.BUCKET_NAME;
 const bucketRegion = process.env.BUCKET_REGION;
