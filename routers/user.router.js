@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
+import { createVerifyToken } from '../middleware/emailToken.middleware.js';
 
 import dotenv from 'dotenv';
 
@@ -17,7 +18,7 @@ import crypto from 'crypto';
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
-import nodemailer from 'nodemailer';
+import verifyEmail from '../utils/nodemailer.js';
 
 dotenv.config();
 
@@ -48,24 +49,28 @@ const randomImageName = (bytes = 32) =>
 // 회원가입 email 인증
 router.post('/sendcode', async (req, res, next) => {
   const { email } = req.body;
-  const user = await prisma.users.findUnique({ where: { email } });
-
-  if (!user.isVerified) {
-    const verifyToken = createVerifyToken(user.email);
-    res.cookie('verification', `Bearer ${verifyToken}`);
-    await emailSender(email, verifyToken);
-    try {
-      res.json({
-        ok: true,
-        msg: '이메일이 성공적으로 전송되었습니다.',
-        token: verifyToken,
-      });
-    } catch (error) {
-      console.error('이메일 전송에 실패했습니다:', error);
-      res.status(500).json({ ok: false, msg: '이메일 전송에 실패했습니다.' });
+  try {
+    // 사용자가 이미 등록되어 있는지 확인
+    const user = await prisma.users.findUnique({ where: { email } });
+    if (user && user.isVerified) {
+      return res
+        .status(400)
+        .json({ success: false, msg: '이미 인증 완료된 이메일입니다.' });
     }
-  } else {
-    res.status(400).json({ ok: false, msg: '이미 인증 완료된 이메일입니다.' });
+    // 사용자가 없거나 미인증 상태인 경우에만 이메일 전송
+    const verifyToken = createVerifyToken(email);
+    res.cookie('verification', `Bearer ${verifyToken}`);
+    await verifyEmail(email, verifyToken);
+    return res.json({
+      success: true,
+      msg: '이메일이 성공적으로 전송되었습니다.',
+      token: verifyToken,
+    });
+  } catch (error) {
+    console.error('이메일 전송 중에 오류가 발생했습니다:', error);
+    return res
+      .status(500)
+      .json({ success: false, msg: '이메일 전송 중에 오류가 발생했습니다.' });
   }
 });
 
@@ -133,7 +138,7 @@ router.post(
     if (!passwordConfirm) {
       return res.status(400).json({ message: '비밀번호 확인은 필수값입니다.' });
     }
-    if (password.email < 6) {
+    if (password.length < 6) {
       return res
         .status(400)
         .json({ message: '비밀번호는 최소 6자 이상입니다.' });
