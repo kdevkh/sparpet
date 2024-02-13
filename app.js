@@ -21,15 +21,16 @@ app.use(cookieParser());
 app.use(session({ secret: 'secret_key'}));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(express.static('public'));
 
-app.get('/', function(req, res){
-	res.render('index', { user: req.user });
-});
+// app.get('/', function(req, res){
+// 	res.render('index', { user: req.user });
+// });
 
 
-app.get('/login', function(req, res){
-	res.render('login', { user: req.user });
-});
+// app.get('/login', function(req, res){
+// 	res.render('login', { user: req.user });
+// });
 
 // Setting the naver oauth routes
 app.get('/auth/naver', 
@@ -50,15 +51,17 @@ app.get('/logout', function(req, res){
 	res.redirect('/');
 });
 
-
-// Passport 사용자 인증 initialize
-passport.serializeUser(function(user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function(obj, done) {
-  done(null, obj);
-});
+// passport-kakao
+app.get('/auth/kakao', passport.authenticate('kakao', { state: 'myStateValue' }));
+app.get(
+  '/auth/kakao/callback',
+  passport.authenticate('kakao', {
+    failureRedirect: '/',
+  }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
 
 app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);

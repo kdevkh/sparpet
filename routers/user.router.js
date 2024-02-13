@@ -15,6 +15,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, randomName, bucketName } from '../utils/aws.js';
 import passport from 'passport';
 import { Strategy as naverStrategy } from 'passport-naver';
+import { Strategy as KakaoStrategy } from 'passport-kakao';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -77,6 +78,73 @@ passport.use(
         console.log('Session Check' + req.session.sid);
         done(null, user);
       });
+    }
+  )
+);
+
+// passport-kakao
+const clientKakaoID = process.env.CLIENT_ID_KAKAO;
+const clientKakaoSecret = process.env.CLIENT_SECRET_KAKAO;
+const callbackKakaoURL = process.env.CALLBACK_URL_KAKAO;
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (req, user, done) {
+  req.session.sid = user.name;
+  console.log('Session Check' + req.session.sid);
+  done(null, user);
+});
+
+passport.use(
+  new KakaoStrategy(
+    {
+      clientID: clientKakaoID,
+      clientSecret: clientKakaoSecret,
+      callbackURL: callbackKakaoURL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(
+        'KakaoProfile',
+        'accessToken',
+        accessToken,
+        'refreshToken',
+        refreshToken,
+        profile
+      );
+      console.log(profile);
+      try {
+        const kakaoId = profile.id;
+        const kakaoEmail =
+          profile._json &&
+          profile._json.kakao_account &&
+          profile._json.kakao_account.email;
+        const kakaoDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: kakaoEmail,
+          }
+        })
+        if(exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: kakaoId.toString(),
+              email: kakaoEmail,
+              name: kakaoDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+
+        
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
     }
   )
 );
