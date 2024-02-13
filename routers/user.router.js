@@ -14,6 +14,7 @@ import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, randomName, bucketName } from '../utils/aws.js';
 
+
 // multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
