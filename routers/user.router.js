@@ -119,18 +119,26 @@ passport.use(new naverStrategy({
   clientSecret,
   callbackURL
 }, async (accessToken, refreshToken, profile, done) => {
+  console.log("naverProfile","access", accessToken, "re", refreshToken, profile);
+  console.log(profile);
   try{  
     const naverId = profile.id;
-    const naverEmail = profile.email[0].value;
-    const naverDisplayName = profile.displayname;
+    const naverEmail = profile.emails && profile.emails[0].value;
+    const naverDisplayName = profile.displayName;
+    const naverGender = profile.gender;
+    const naverBirth = profile.birthday;
+    const naverPhone = profile.phone;
     // const provider = 'naver',
     // const naver = profile._json
   
   const newUser = await prisma.users.create({
     data: {
-      userId: naverId,
+      clientId: naverId,
       email: naverEmail,
       name: naverDisplayName,
+      gender: naverGender,
+      birth: naverBirth,
+      phone: naverPhone
     }
   });
   
@@ -152,29 +160,6 @@ passport.use(new naverStrategy({
   });
 
 }));
-// function(accessToken, refreshToken, profile, done) {
-//   console.log("naver profile", accessToken, refreshToken, profile);
-//   User.findOne({
-//       'naver.id': profile.id
-//   }, function(err, user) {
-//       if (!user) {
-//           user = new user({
-//               name: profile.displayName,
-//               email: profile.emails[0].value,
-//               username: profile.displayName,
-//               provider: 'naver',
-//               naver: profile._json
-//           });
-//           user.save(function(err) {
-//               if (err) console.log(err);
-//               return done(err, user);
-//           });
-//       } else {
-//           return done(err, user);
-//       }
-//   });
-// }
-// ));
 
 
 
