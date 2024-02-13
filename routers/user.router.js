@@ -6,28 +6,14 @@ import jwtValidate from '../middleware/jwtValidate.middleware.js';
 
 import multer from 'multer';
 import {
-  S3Client,
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
-import crypto from 'crypto';
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import 'dotenv/config'
+import { s3, randomName, bucketName } from '../utils/aws.js';
 
-const bucketName = process.env.BUCKET_NAME;
-const bucketRegion = process.env.BUCKET_REGION;
-const accessKey = process.env.AWS_ACCESS_KEY;
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
-
-const s3 = new S3Client({
-  credentials: {
-    accessKeyId: accessKey,
-    secretAccessKey: secretAccessKey,
-  },
-  region: bucketRegion,
-});
 
 // multer
 const storage = multer.memoryStorage();
@@ -35,10 +21,6 @@ const upload = multer({ storage: storage });
 
 const prisma = new PrismaClient();
 const router = express.Router();
-
-/** 랜덤 문자열 생성 함수 for 'unique' imageName to put in s3 bucket */
-const randomImageName = (bytes = 32) =>
-  crypto.randomBytes(bytes).toString('hex');
 
 // 회원가입
 router.post(
@@ -86,7 +68,7 @@ router.post(
     }
 
     // profileImage가 req에 존재하면,
-    const imageName = randomImageName();
+    const imageName = randomName();
     if (req.file) {
       // s3에 저장
       // 그 전에 320x320px로 리사이징
@@ -245,7 +227,7 @@ router.patch(
       const imageBuffer = await sharp(req.file.buffer)
         .resize({ height: 320, width: 320, fit: 'contain' })
         .toBuffer();
-      imageName = randomImageName();
+      imageName = randomName();
       params = {
         Bucket: bucketName,
         Key: imageName,
