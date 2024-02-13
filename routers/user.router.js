@@ -13,7 +13,73 @@ import {
 import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, randomName, bucketName } from '../utils/aws.js';
+import passport from 'passport';
+import { Strategy as naverStrategy } from 'passport-naver';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+// passport-naver
+const clientID = process.env.CLIENT_ID;
+const clientSecret = process.env.CLIENT_SECRET;
+const callbackURL = process.env.CALLBACK_URL;
+
+passport.use(
+  new naverStrategy(
+    {
+      clientID,
+      clientSecret,
+      callbackURL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(
+        'naverProfile',
+        'access',
+        accessToken,
+        're',
+        refreshToken,
+        profile
+      );
+      console.log(profile);
+      try {
+        const naverId = profile.id;
+        const naverEmail = profile.emails && profile.emails[0].value;
+        const naverDisplayName = profile.displayName;
+        const naverGender = profile.gender;
+        const naverBirth = profile.birthday;
+        const naverPhone = profile.phone;
+        // const provider = 'naver',
+        // const naver = profile._json
+
+        const newUser = await prisma.users.create({
+          data: {
+            clientId: naverId,
+            email: naverEmail,
+            name: naverDisplayName,
+            gender: naverGender,
+            birth: naverBirth,
+            phone: naverPhone,
+          },
+        });
+
+        done(null, newUser);
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+
+      passport.serializeUser(function (user, done) {
+        done(null, user);
+      });
+
+      passport.deserializeUser(function (req, user, done) {
+        req.session.sid = user.name;
+        console.log('Session Check' + req.session.sid);
+        done(null, user);
+      });
+    }
+  )
+);
 
 // multer
 const storage = multer.memoryStorage();
@@ -103,23 +169,36 @@ router.post(
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
-  const { email, password } = req.body;
-  if (!email) {
-    return res.status(400).json({ message: '이메일은 필수값입니다.' });
-  }
-  if (!password) {
-    return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+  const { clientId, email, password } = req.body;
+  let user;
+
+  if (clientId) {
+    user = await prisma.users.findFirst({
+      where: {
+        clientId,
+      },
+    });
+    if (!user)
+      return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+  } else{
+    if (!email) {
+      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+    }
+    if (!password) {
+      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+    }
+  
+    user = await prisma.users.findFirst({
+      where: {
+        email,
+        password: sha256(password).toString(),
+      },
+    });
+    if (!user) {
+      return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+    }
   }
 
-  const user = await prisma.users.findFirst({
-    where: {
-      email,
-      password: sha256(password).toString(),
-    },
-  });
-  if (!user) {
-    return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
-  }
   const accessToken = jwt.sign({ userId: user.id }, 'secretKey', {
     expiresIn: '12h',
   });

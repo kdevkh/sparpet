@@ -13,8 +13,8 @@ model Users {
   email        String?    @unique @map("email")
   password     String?    @map("password")
   phone        String?    @map("phone")
-  gender       Gender     @map("gender")
-  birth        String     @map("birth")
+  gender       Gender?     @map("gender")
+  birth        String?     @map("birth")
   name         String     @map("name")
   profileImage String?    @map("profileImage")
   createdAt    DateTime   @default(now()) @map("createdAt")
@@ -39,22 +39,20 @@ model Posts {
   attachFile String?    @map("attachFile") @db.Text
   comments   Comments[]
   likes      Likes[]
-  user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId], map: "Posts_userId_fkey")
   @@map("Posts")
 }
 
 model Likes {
-  id        Int @id @default(autoincrement()) @map("id")
-  userId    Int @map("userId")
-  postId    Int @map("postId")
-  commentId Int? @map("commentId")
-
-  user    Users?    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  post    Posts?    @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  comment Comments? @relation(fields: [commentId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
+  id        Int       @id @default(autoincrement()) @map("id")
+  userId    Int       @map("userId")
+  postId    Int       @map("postId")
+  commentId Int?      @map("commentId")
+  comment   Comments? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  post      Posts     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([commentId], map: "Likes_commentId_fkey")
   @@index([postId], map: "Likes_postId_fkey")
@@ -68,7 +66,6 @@ model Comments {
   userId    Int      @map("userId")
   content   String   @map("content") @db.Text
   countlike Int      @default(0) @map("countlike")
-
   createdAt DateTime @default(now()) @map("createdAt")
   updatedAt DateTime @updatedAt @map("updatedAt")
   post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
