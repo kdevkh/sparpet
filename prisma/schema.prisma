@@ -38,6 +38,7 @@ model Posts {
   updatedAt  DateTime   @updatedAt @map("updatedAt")
   attachFile String?    @map("attachFile") @db.Text
   view       Int        @default(0) @map("view")
+
   comments   Comments[]
   likes      Likes[]
   user       Users      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -71,7 +72,8 @@ model Comments {
   updatedAt DateTime @updatedAt @map("updatedAt")
   post      Posts    @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Likes     Likes[]
+
+  likes     Likes[]
 
   @@index([postId], map: "Comments_postId_fkey")
   @@index([userId], map: "Comments_userId_fkey")

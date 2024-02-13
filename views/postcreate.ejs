@@ -1,0 +1,18 @@
+<body>
+    <%- include('header.ejs') %>
+
+    <h1 class="createpost">새 게시물 작성</h1>
+    <form class="form-box" action='/posts' method="POST">
+        <div class="create_post">
+            <div id="photo" class="createpost_photo">
+                <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+            </div>
+            <div id="content" class="createpost_content">
+                <input class="createpost_title_input" type="text" placeholder="제목을 입력하세요">
+                <input class="createpost_content_input" type="text" placeholder="내용을 입력하세요">
+                <button class="createpost_btn">게시물 생성</button>
+            </div>
+        </div>
+    </form>
+
+</body>
