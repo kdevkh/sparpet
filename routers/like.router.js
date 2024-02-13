@@ -37,7 +37,7 @@ router.post('/post/:postId', jwtValidate, async (req,res,next) => {
         }
     })
 
-    return res.status(201).json({message : "좋아요 성공"});
+    return res.status(201).render({message : "좋아요 성공"});
 })
 
 // 게시물에 좋아요 취소

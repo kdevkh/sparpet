@@ -16,6 +16,7 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(express.static('public'));
 
 // passport-naver
 app.use(session({ secret: 'secret_key'}));
@@ -69,3 +70,11 @@ app.use(errorHandlingMiddleware);
 app.listen(PORT, () => {
   console.log(`sparpet app listening on port ${PORT}`);
 });
+
+app.get('/post/create', async (req,res,next) => {
+  res.render('postcreate.ejs');
+})
+
+app.get('/sign-in', async (req,res,next) => {
+  res.render('sign-in.ejs');
+})

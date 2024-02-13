@@ -83,7 +83,7 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
-      view: true,
+      view : true
     },
     orderBy: [
       {
@@ -92,7 +92,7 @@ router.get('/', async (req, res, next) => {
     ],
   });
 
-  return res.json({ data: posts });
+  return res.render('main.ejs',{ data: posts });
 });
 
 // 게시글 상세 조회
@@ -109,13 +109,14 @@ router.get('/:postId', async (req, res, next) => {
     where: {
       id: Number(postId)
     },
-    data: {
-      view: {
-        increment: 1
+    data : {
+      view : {
+        increment : 1
       }
     }
   })
-  
+
+
   const post = await prisma.posts.findFirst({
     where: {
       id: Number(postId),
@@ -131,8 +132,9 @@ router.get('/:postId', async (req, res, next) => {
           id: true,
         },
       },
+      countlike: true,
       createdAt: true,
-      view: true
+      view : true,
     },
   });
   if (!post) {
@@ -154,7 +156,7 @@ router.get('/:postId', async (req, res, next) => {
   }
   post.attachFile = attachFileUrlList;
 
-  return res.json({ data: post });
+  return res.render('detail.ejs',{ data: post });
 });
 
 // 게시글 생성
