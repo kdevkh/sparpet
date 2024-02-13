@@ -185,56 +185,143 @@ router.get('/profile', jwtValidate, async (req, res, next) => {
 });
 
 // 내 정보 수정
-router.patch('/profile', jwtValidate, async (req, res, next) => {
-  const userId = res.locals.user.id;
-  const {
-    profileImage,
-    name,
-    phone,
-    gender,
-    birth,
-    newPassword,
-    newPasswordConfirm,
-  } = req.body;
-
-  if (
-    !profileImage &&
-    !name &&
-    !phone &&
-    !gender &&
-    !birth &&
-    !newPassword &&
-    !newPasswordConfirm
-  ) {
-    return res.status(400).json({ message: '수정할 정보를 입력해주세요.' });
-  }
-
-  if (newPassword !== newPasswordConfirm) {
-    return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
-  }
-
-  const user = await prisma.users.findFirst({
-    where: { id: userId },
-  });
-  if (!user) {
-    return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
-  }
-
-  const hashedNewPassword = sha256(newPassword).toString();
-
-  await prisma.users.update({
-    where: { id: userId },
-    data: {
+router.patch(
+  '/profile',
+  jwtValidate,
+  upload.single('profileImage'),
+  async (req, res, next) => {
+    const userId = res.locals.user.id;
+    const {
       profileImage,
       name,
       phone,
       gender,
       birth,
-      password: hashedNewPassword,
-    },
-  });
+      newPassword,
+      newPasswordConfirm,
+    } = req.body;
 
-  return res.json({ message: '사용자 정보가 업데이트되었습니다.' });
+    if (
+      !profileImage &&
+      !name &&
+      !phone &&
+      !gender &&
+      !birth &&
+      !newPassword &&
+      !newPasswordConfirm
+    ) {
+      return res.status(400).json({ message: '수정할 정보를 입력해주세요.' });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+
+    const user = await prisma.users.findFirst({
+      where: { id: userId },
+    });
+    if (!user) {
+      return res.status(404).json({ message: '사용자를 찾을 수 없습니다.' });
+    }
+
+    const hashedNewPassword = sha256(newPassword).toString();
+
+    let imageName = user.profileImage;
+    // 사용자가 profileImage를 수정하려고 한다면,
+    if (req.file) {
+      let params, command;
+      // 만약 이미 profileImage가 존재했다면,
+      // s3에서 기존의 profileImage 저장된 것 삭제
+      if (imageName) {
+        params = {
+          Bucket: bucketName,
+          Key: imageName,
+        };
+        command = new DeleteObjectCommand(params);
+        await s3.send(command);
+      }
+      // s3에 저장
+      // 그 전에 320x320px로 리사이징
+      const imageBuffer = await sharp(req.file.buffer)
+        .resize({ height: 320, width: 320, fit: 'contain' })
+        .toBuffer();
+      imageName = randomImageName();
+      params = {
+        Bucket: bucketName,
+        Key: imageName,
+        Body: imageBuffer,
+        ContentType: req.file.mimetype,
+      };
+      command = new PutObjectCommand(params);
+      await s3.send(command); // command를 s3으로 보낸다.
+    }
+
+    const updatedUser = await prisma.users.update({
+      where: { id: userId },
+      data: {
+        profileImage: imageName,
+        name,
+        phone,
+        gender,
+        birth,
+        password: hashedNewPassword,
+      },
+    });
+
+    return res.json({
+      message: '사용자 정보가 업데이트되었습니다.',
+      data: updatedUser,
+    });
+  }
+);
+
+/** 내가 팔로잉하는 유저 목록 조회 */
+router.get('/following', jwtValidate, async (req, res, next) => {
+  try {
+    const followedByUserId = res.locals.user.id; // me
+    const followingUsers = await prisma.users.findMany({
+      where: {
+        following: {
+          some: {
+            followedById: +followedByUserId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        clientId: true,
+        email: true,
+      },
+    });
+    return res.status(200).json({ followingUsers });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/** 내 팔로워 목록 조회*/
+router.get('/follower', jwtValidate, async (req, res, next) => {
+  try {
+    const followingUserId = res.locals.user.id; // me
+    const followers = await prisma.users.findMany({
+      where: {
+        followedBy: {
+          some: {
+            followingId: +followingUserId,
+          },
+        },
+      },
+      select: {
+        id: true,
+        clientId: true,
+        email: true,
+      },
+    });
+
+    return res.status(200).json({ followers });
+  } catch (err) {
+    next(err);
+  }
 });
 
 export default router;
