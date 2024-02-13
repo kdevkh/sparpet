@@ -83,6 +83,7 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
+      view: true,
     },
     orderBy: [
       {
@@ -104,6 +105,17 @@ router.get('/:postId', async (req, res, next) => {
     });
   }
 
+  await prisma.posts.update({
+    where: {
+      id: Number(postId)
+    },
+    data: {
+      view: {
+        increment: 1
+      }
+    }
+  })
+  
   const post = await prisma.posts.findFirst({
     where: {
       id: Number(postId),
@@ -120,6 +132,7 @@ router.get('/:postId', async (req, res, next) => {
         },
       },
       createdAt: true,
+      view: true
     },
   });
   if (!post) {
