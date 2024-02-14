@@ -26,7 +26,8 @@ router.post('/:postId/comments', jwtValidate, async (req, res, next) => {
     },
   });
 
-  return res.status(201).json({});
+  //return res.status(201).json({});
+  res.redirect('back');
 });
 
 // 댓글 조회

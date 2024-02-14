@@ -6,7 +6,7 @@ import multerS3 from 'multer-s3';
 import { s3, randomName, bucketName } from '../utils/aws.js';
 import { GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
+import axios from 'axios';
 //===========================================================
 const upload = multer({
   storage: multerS3({
@@ -83,7 +83,8 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
-      view : true
+      attachFile: true,
+      view: true,
     },
     orderBy: [
       {
@@ -92,7 +93,28 @@ router.get('/', async (req, res, next) => {
     ],
   });
 
-  return res.render('main.ejs',{ data: posts });
+  for (let i = 0; i < posts.length; i++) {
+    if (posts[i].attachFile) {
+      const tmp = posts[i].attachFile
+        .split(',')
+        .filter((file) =>
+          ['jpg', 'jpeg', 'png', 'gif'].includes(file.split('.')[1])
+        );
+
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: tmp[0],
+      });
+      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
+
+      posts[i].attachFile = signedUrl;
+    } else {
+      posts[i].attachFile =
+        'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
+    }
+  }
+
+  return res.render('main.ejs', { data: posts });
 });
 
 // 게시글 상세 조회
@@ -107,15 +129,14 @@ router.get('/:postId', async (req, res, next) => {
 
   await prisma.posts.update({
     where: {
-      id: Number(postId)
+      id: Number(postId),
     },
-    data : {
-      view : {
-        increment : 1
-      }
-    }
-  })
-
+    data: {
+      view: {
+        increment: 1,
+      },
+    },
+  });
 
   const post = await prisma.posts.findFirst({
     where: {
@@ -134,7 +155,7 @@ router.get('/:postId', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
-      view : true,
+      view: true,
     },
   });
   if (!post) {
@@ -156,12 +177,18 @@ router.get('/:postId', async (req, res, next) => {
   }
   post.attachFile = attachFileUrlList;
 
-  const comments = await prisma.comments.findMany({
-    where: { postId: Number(postId) },
-    orderBy: { createdAt: 'desc' },
-  });
+  // const comments = await prisma.comments.findMany({
+  //   where: { postId: Number(postId) },
+  //   orderBy: { createdAt: 'desc' },
+  // });
 
-  return res.render('detail.ejs',{ post: post, comment: comments });
+  const commentRes = await axios.get(
+    `http://localhost:3000/posts/${postId}/comments`
+  );
+  return res.render('detail.ejs', {
+    post: post,
+    comment: commentRes.data.comment,
+  });
 });
 
 // 게시글 생성
