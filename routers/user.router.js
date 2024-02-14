@@ -38,8 +38,6 @@ passport.use(
         const naverGender = profile.gender;
         const naverBirth = profile.birthday;
         const naverPhone = profile.phone;
-        // const provider = 'naver',
-        // const naver = profile._json
 
         const exUser = await prisma.users.findFirst({
           where: {
