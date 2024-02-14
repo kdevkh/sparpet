@@ -65,6 +65,12 @@ app.get(
   }
 );
 
+app.get('/profile/edit', jwtValidate, verifiedEmail, async (req, res, next) => {
+  const user = res.locals.user;
+
+  res.render('profileedit.ejs', { user: user });
+});
+
 app.get('/sign-in', async (req, res, next) => {
   res.render('sign-in.ejs');
 });
@@ -149,7 +155,7 @@ app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter, commentRouter);
 app.use('/like', likeRouter);
-app.use(errorMiddleware);
+
 app.listen(PORT, () => {
   console.log(`sparpet app listening on port ${PORT}`);
 });

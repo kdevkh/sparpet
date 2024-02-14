@@ -1,444 +1,615 @@
 button {
-    cursor: pointer;
+  cursor: pointer;
 }
 
 .header {
-    width: auto;
-    height: 80px;
-    position: relative;
-    margin-top: 30px;
+  width: auto;
+  height: 80px;
+  position: relative;
+  margin-top: 30px;
 }
 
 .logo {
-    font-size: 60px;
-    margin-left: 50px;
+  font-size: 60px;
+  margin-left: 50px;
 }
 
 a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .search {
-    position: absolute;
-    top: 15px;
-    left: 35%;
+  position: absolute;
+  top: 15px;
+  left: 35%;
 }
 
 .search_input {
-    width: 500px;
-    height: 45px;
-    border-radius: 50px;
-    border: 1px solid black;
-    text-align: center;
-    font-size: 18px;
+  width: 500px;
+  height: 45px;
+  border-radius: 50px;
+  border: 1px solid black;
+  text-align: center;
+  font-size: 18px;
 }
 
 .search_button {
-    font-size: 20px;
-    border: none;
-    background-color: transparent;
+  font-size: 20px;
+  border: none;
+  background-color: transparent;
 
-    position: absolute;
-    left: 15px;
-    top: 12px;
+  position: absolute;
+  left: 15px;
+  top: 12px;
 }
 
-.sign_in, .sign_up, .sign_out {
-    border: 1px solid black;
-    border-radius: 50px;
-    background-color: transparent;
-    text-align: center;
+.sign_in,
+.sign_up,
+.sign_out {
+  border: 1px solid black;
+  border-radius: 50px;
+  background-color: transparent;
+  text-align: center;
 
-    padding: 8px;
+  padding: 8px;
 
-    width: 80px;
+  width: 80px;
 }
 
 .sign_in {
-    margin-right: 25px;
+  margin-right: 25px;
 }
 
 .sign_in {
-    position: absolute;
-    right: 13%;
-    top: 25px;
+  position: absolute;
+  right: 13%;
+  top: 25px;
 
-    display: block;
+  display: block;
 }
 
 .sign_up {
-    position: absolute;
-    right: 7.5%;
-    top: 25px;
+  position: absolute;
+  right: 7.5%;
+  top: 25px;
 }
 
 .sign_out {
-    position: absolute;
-    right: 14.4%;
-    top: 25px;
+  position: absolute;
+  right: 14.4%;
+  top: 25px;
 
-    font-size: 15px;
-    width: 100px;
+  font-size: 15px;
+  width: 100px;
 
-    display: none;
+  display: none;
 }
 
 .orderbtn button,
 .newpost {
-    border: 1px solid black;
-    background-color: transparent;
-    padding: 8px;
+  border: 1px solid black;
+  background-color: transparent;
+  padding: 8px;
 
-    width: 80px;
+  width: 80px;
 }
 
 .orderbtn {
-    display: flex;
+  display: flex;
 
-    margin-top: 30px;
-    margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
-
 
 /* -----메인페이지-------- */
 
 .postcontainer {
-    border: 3px solid black;
-    padding: 50px;
+  border: 3px solid black;
+  padding: 50px;
 
-    margin-top: 50px;
+  margin-top: 50px;
 }
 
 .posts {
-    width: 94%;
+  width: 94%;
 
-    display: grid;
-    grid-template-columns: repeat(4, 350px);
-    grid-auto-rows: auto;
+  display: grid;
+  grid-template-columns: repeat(4, 350px);
+  grid-auto-rows: auto;
 
-    grid-column-gap: 80px;
-    grid-row-gap: 200px;
+  grid-column-gap: 80px;
+  grid-row-gap: 200px;
 }
 
 .post {
-    display: flex;
-    width: 330px;
-    flex-direction: column;
+  display: flex;
+  width: 330px;
+  flex-direction: column;
 
-    color: black;
-    padding: 10px;
+  color: black;
+  padding: 10px;
 
-    border: 1px solid black;
-    background-color: white;
+  border: 1px solid black;
+  background-color: white;
 }
 
 .photo img {
-    width: 100%;
-    height: auto;
-    object-fit: cover;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 
-    border: 1px solid black;
+  border: 1px solid black;
 }
 
 .content {
-    margin : 15px 10px 10px 10px
+  margin: 15px 10px 10px 10px;
 }
 
 .title {
-    font-size: 30px;
-    margin-bottom: 20px;
-    font-weight: bold;
+  font-size: 30px;
+  margin-bottom: 20px;
+  font-weight: bold;
 }
 
 .username {
-    font-size: 18px;
-    margin-bottom: 10px;
+  font-size: 18px;
+  margin-bottom: 10px;
 }
 
 .countlike {
-    font-size: 20px;
-    margin-left: 260px;
+  font-size: 20px;
+  margin-left: 260px;
 
-    border: transparent;
-    background-color: transparent;
+  border: transparent;
+  background-color: transparent;
 }
 
 .view {
-    text-align-last: right;
-    margin-top: 25px;
+  text-align-last: right;
+  margin-top: 25px;
 }
 
 /* --------상세페이지---------- */
 .detail_post,
 .create_post {
-    border: 1px solid black;
-    padding: 30px;
-    height: 600px;
-    align-items: center;
-    margin-top: 50px;
-    width: 96%;
+  border: 1px solid black;
+  padding: 30px;
+  height: 600px;
+  align-items: center;
+  margin-top: 50px;
+  width: 96%;
 
-    display: flex;
+  display: flex;
 }
 
 .detail_photo {
-    width: 50%;
+  width: 50%;
 }
 
 .detail_contents,
 .createpost_content {
-    border: 1px solid black;
-    width: 75%;
-    height: 500px;
-    margin-left: 5%;
+  border: 1px solid black;
+  width: 75%;
+  height: 500px;
+  margin-left: 5%;
 
-    padding: 25px;
+  padding: 25px;
 
-    position: relative;
+  position: relative;
 }
 
 .detail_title {
-    font-size: 50px;
-    text-align: center;
+  font-size: 50px;
+  text-align: center;
 
-    margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 .detail_username {
-    font-size: 18px;
-    text-align: end;
+  font-size: 18px;
+  text-align: end;
 
-    margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 .detail_content {
-    font-size: 25px;
-    text-align: center;
+  font-size: 25px;
+  text-align: center;
 }
 
 .detail_createdAt {
-    position: absolute;
-    bottom: 30px;
+  position: absolute;
+  bottom: 30px;
 }
 
 .detail_countlike {
-    position: absolute;
-    bottom: 30px;
-    right : 30px;
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
 
-    font-size: 18px;
-    border: transparent;
-    background-color: transparent;
+  font-size: 18px;
+  border: transparent;
+  background-color: transparent;
 }
 
 .detail_view {
-    font-size: 18px;
+  font-size: 18px;
 
-    position: absolute;
-    bottom: 30px;
-    right : 100px;
+  position: absolute;
+  bottom: 30px;
+  right: 100px;
 }
 
 .editpost {
-    display: flex;
+  display: flex;
 }
 
 .editcomment {
-    display: none;
+  display: none;
 }
 
 .post_edit,
 .post_delete {
-    background-color: transparent;
-    border: 1px solid black;
-    width: 100px;
-    height: 50px;
+  background-color: transparent;
+  border: 1px solid black;
+  width: 100px;
+  height: 50px;
 
-    padding: 8px;
-    margin-left: 15px;
-    margin-top: 15px;
+  padding: 8px;
+  margin-left: 15px;
+  margin-top: 15px;
 }
 
 .commentcontainer {
-    border: 1px solid black;
-    width: 90%;
+  border: 1px solid black;
+  width: 90%;
 
-    padding: 25px;
-    margin-top: 50px;
-    margin-bottom: 300px;
-    margin-left: 5%;
+  padding: 25px;
+  margin-top: 50px;
+  margin-bottom: 300px;
+  margin-left: 5%;
 }
 
 .comments {
-    border: 1px solid black;
-    height: 80px;
-    padding: 10px;
+  border: 1px solid black;
+  height: 80px;
+  padding: 10px;
 
-    display: block;
+  display: block;
 }
 
 .commentitem {
-    display: flex;
+  display: flex;
 }
 
 .comment {
-    margin : 18px 0 15px 15px;
-    font-size: 18px;
+  margin: 18px 0 15px 15px;
+  font-size: 18px;
 }
 
 .comment_countlike,
 .comment_edit,
 .comment_delete {
-    border: transparent;
-    background-color: transparent;
-    padding: 5px;
+  border: transparent;
+  background-color: transparent;
+  padding: 5px;
 
-    font-size: 15px;
+  font-size: 15px;
 
-    margin-top: 60px;
-    margin-left: auto;
+  margin-top: 60px;
+  margin-left: auto;
 }
 
 .comment_edit {
-    margin-top: 45px;
+  margin-top: 45px;
 }
 
 .space {
-    height: 30px;
+  height: 30px;
 }
 
 .comment_input {
-    height: 50px;
-    padding: 10px;
-    width: 80%;
-    margin-left: 6% ;
+  height: 50px;
+  padding: 10px;
+  width: 80%;
+  margin-left: 6%;
 }
 
 .newcomment {
-    display: flex;
+  display: flex;
 
-    margin-top: 50px;
+  margin-top: 50px;
 }
 
 .comment_input {
-    width: 1200px;
+  width: 1200px;
 }
 
 .newcomment_btn {
-    border: 1px solid black;
-    background-color: transparent;
-    height: 50px;
-    width: 100px;
-    margin-left: 5px;
+  border: 1px solid black;
+  background-color: transparent;
+  height: 50px;
+  width: 100px;
+  margin-left: 5px;
 }
 
 /* -----새 게시물 작성----- */
 .createpost {
-    border: 1px solid black;
-    text-align: center;
+  border: 1px solid black;
+  text-align: center;
 
-    padding: 25px;
-    margin-top: 80px;
+  padding: 25px;
+  margin-top: 80px;
 }
 
 .createpost_title_input {
-    width: 100%;
-    height: 50px;
+  width: 100%;
+  height: 50px;
 
-    margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
 .createpost_content_input {
-    width: 100%;
-    height: 100px;
+  width: 100%;
+  height: 100px;
 }
 
 .createpost_btn {
-    border: 1px solid black;
-    border-radius: 50px;
-    margin-top: 280px;
-    margin-left: 88%;
-    background-color: transparent;
+  border: 1px solid black;
+  border-radius: 50px;
+  margin-top: 280px;
+  margin-left: 88%;
+  background-color: transparent;
 
-    padding: 8px;
+  padding: 8px;
 
-    width: 100px;
+  width: 100px;
 }
 
 /* -----로그인페이지----- */
 
 .sign-in {
-    border: 1px solid black;
-    padding: 30px;
+  border: 1px solid black;
+  padding: 30px;
 
-    width: 30%;
-    height: 500px;
-    margin-left: 32%;
-    margin-top: 50px;
+  width: 30%;
+  height: 500px;
+  margin-left: 32%;
+  margin-top: 50px;
 }
 
-.email, 
+.email,
 .password,
 .name,
 .gender,
 .birth {
-    margin: 30px 0 30px 50px;
+  margin: 30px 0 30px 50px;
 }
 
 .passwordConfirm {
-    margin: 30px 0 30px 18px;
+  margin: 30px 0 30px 18px;
 }
 
 .phone {
-    margin: 30px 0 30px 30px;
+  margin: 30px 0 30px 30px;
 }
 
 .email_input {
-    margin-left: 23px;
-    width: 300px;
-    height: 30px;
-    padding: 5px;
+  margin-left: 23px;
+  width: 300px;
+  height: 30px;
+  padding: 5px;
 }
 
 .phone_input {
-    margin-left: 18px;
-    width: 300px;
-    height: 30px;
-    padding: 5px;
+  margin-left: 18px;
+  width: 300px;
+  height: 30px;
+  padding: 5px;
 }
 
 .M_input,
 .F_input {
-    margin-left: 30px;
-    width: 80px;
-    height: 15px;
-    padding: 5px;
+  margin-left: 30px;
+  width: 80px;
+  height: 15px;
+  padding: 5px;
 }
 
 .name_input {
-    margin-left: 38px;
-    width: 300px;
-    height: 30px;
-    padding: 5px;
+  margin-left: 38px;
+  width: 300px;
+  height: 30px;
+  padding: 5px;
 }
 
 .password_input,
 .birth_input,
 .passwordConfirm_input {
-    margin-left: 10px;
-    width: 300px;
-    height: 30px;
-    padding: 5px;
+  margin-left: 10px;
+  width: 300px;
+  height: 30px;
+  padding: 5px;
 }
 
 .sign-btn {
-    border: 1px solid black;
-    /* border-radius: 50px; */
-    
-    background-color: transparent;
+  border: 1px solid black;
+  /* border-radius: 50px; */
 
-    padding: 15px;
+  background-color: transparent;
 
-    margin-left: 40%;
-    margin-top: 25px;
+  padding: 15px;
+
+  margin-left: 40%;
+  margin-top: 25px;
+}
+
+/** 프로필 상세 **/
+.profile-container {
+  margin: 0 auto;
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  grid-template-rows: repeat(auto-fit, minmax(0, 1fr));
+  grid-template-areas: 'profile' 'posts';
+  /* grid-template-areas:
+    'pic-btn' 'posts'
+    'content' 'posts'
+    'btn' 'posts'; */
+  border: 1px solid black;
+}
+
+.my-profile-container {
+  grid-area: 'profile';
+  border: 1px solid black;
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.my-posts-container {
+  grid-area: 'posts';
+  border: 1px solid black;
+  margin: 10px;
+}
+
+.profile-img-btns {
+  flex: 3;
+  display: flex;
+  justify-content: center;
+  border: 1px solid black;
+  margin: 3px;
+}
+
+.profile-img {
+  justify-content: center;
+}
+
+.profile-btns {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin-left: 40px;
+}
+
+.profile-btns > button {
+  margin-top: 5px;
+}
+
+.profile-img > img {
+  background-color: white;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.profile-content {
+  flex: 3;
+  border: 1px solid black;
+  margin: 3px;
+}
+
+.profile-edit {
+  flex: 1;
+  border: 1px solid black;
+  margin: 3px;
+}
+
+.my-post {
+  border: 1px solid black;
+  margin: 3px;
+}
+
+/** 프로필 수정 **/
+
+.edit-profile-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 50%;
+  margin: 0 auto;
+  border: 1px solid black;
+}
+
+.edit-profile-container > div {
+  margin-bottom: 10px;
+  /* border: 1px solid black; */
+  height: 50px;
+  width: 300px;
+}
+
+/** 내가 팔로잉하는 유저 목록 조회 */
+.my-following-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.my-following {
+  width: 50%;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid black;
+}
+
+.my-following > div {
+  font-size: 16px;
+  margin-bottom: 10px;
+  height: 15px;
+}
+
+/** 팔로잉하는 게시물 조회 **/
+.following-posts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.following-post {
+  width: 50%;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid black;
+}
+
+.following-post > div {
+  font-size: 16px;
+  margin-bottom: 10px;
+  height: 15px;
+}
+
+/** 내 팔로워 조회 */
+.my-followers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.my-follower {
+  width: 50%;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid black;
+}
+
+.my-follower > div {
+  font-size: 16px;
+  margin-bottom: 10px;
+  height: 15px;
 }

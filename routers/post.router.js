@@ -4,7 +4,11 @@ import jwtValidate from '../middleware/jwtValidate.middleware.js';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
 import { s3, randomName, bucketName } from '../utils/aws.js';
-import { GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  DeleteObjectCommand,
+  ListBucketInventoryConfigurationsCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
 
@@ -51,7 +55,9 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       userId: { in: followingUsersIdList },
     },
   });
-  return res.status(200).json({ posts });
+
+  //return res.status(200).json({ posts });
+  res.render('followingposts.ejs', { posts: posts });
 });
 
 // 게시글 목록 조회
@@ -84,16 +90,16 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
-      view : true
+      view: true,
     },
     orderBy: [
       {
-        [orderKey]: orderValue
+        [orderKey]: orderValue,
       },
     ],
   });
 
-  return res.render('main.ejs',{ data: posts });
+  return res.render('main.ejs', { data: posts });
 });
 
 // 게시글 상세 조회
@@ -135,7 +141,6 @@ router.get('/:postId', async (req, res, next) => {
       countlike: true,
       createdAt: true,
       view: true,
-
     },
   });
   if (!post) {
@@ -162,7 +167,7 @@ router.get('/:postId', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  return res.render('detail.ejs',{ post: post, comment: comments });
+  return res.render('detail.ejs', { post: post, comment: comments });
 });
 
 // 게시글 생성
@@ -248,22 +253,24 @@ router.patch(
     }
 
     // 사용자가 attachFile을 수정하려고 하면,
-    // s3에 저장된 기존 것 삭제
-    const existFileNameList = post.attachFile.split(',');
-    for (let i = 0; i < existFileNameList.length; i++) {
-      const command = new DeleteObjectCommand({
-        Bucket: bucketName,
-        Key: existFileNameList[i],
-      });
-      try {
-        await s3.send(command);
-      } catch (err) {
-        next(err);
+    let attachFilesString = post.attachFile;
+    if (req.files) {
+      // s3에 저장된 기존 것 삭제
+      const existFileNameList = post.attachFile.split(',');
+      for (let i = 0; i < existFileNameList.length; i++) {
+        const command = new DeleteObjectCommand({
+          Bucket: bucketName,
+          Key: existFileNameList[i],
+        });
+        try {
+          await s3.send(command);
+        } catch (err) {
+          next(err);
+        }
       }
+      // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
+      attachFilesString = req.files.map((file) => file.key).join(',');
     }
-
-    // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
-    const attachFilesString = req.files.map((file) => file.key).join(',');
 
     const data = await prisma.posts.update({
       where: {
@@ -287,7 +294,7 @@ router.delete(
   jwtValidate,
   verifiedEmail,
   async (req, res, next) => {
-    console.log("제발");
+    console.log('제발');
     const user = res.locals.user;
     const postId = req.params.postId;
 
@@ -377,7 +384,9 @@ router.post(
             followingId: +followingUserId,
           },
         });
-        return res.status(201).json({ message: '언팔로우 성공' });
+        console.log('언팔로우 성공', isExistfollowingUser);
+        return res.redirect('back');
+        //return res.status(201).json({ message: '언팔로우 성공' });
       }
 
       // A가 B를 팔로우
@@ -387,11 +396,12 @@ router.post(
           followedById: +followedByUserId,
         },
       });
-      return res.status(201).json({ message: '팔로우 성공', followUsers });
+      console.log('팔로우 성공', isExistfollowingUser, followUsers);
+      res.redirect('back');
+      //return res.status(201).json({ message: '팔로우 성공', followUsers });
     } catch (err) {
       next(err);
     }
   }
 );
-
 export default router;

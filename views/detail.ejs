@@ -3,7 +3,7 @@
     <%- include('header.ejs') %>
         <div class="detail_post">
             <div class="detail_photo">
-                <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+                <img src=" https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
             </div>
             <div class="detail_contents">
                 <div class="detail_title">
@@ -24,6 +24,11 @@
                 </form>
                 <div class="detail_view">
                     조회수 : <%= post.view %>
+                </div>
+                <div class="follow">
+                    <form class="form-box" action='/posts/<%= post.id %>/follow' method="POST">
+                        <button class="follow-btn">팔로우</button>
+                    </form>
                 </div>
             </div>
         </div>

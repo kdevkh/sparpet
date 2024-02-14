@@ -1,0 +1,11 @@
+<body>
+  <%- include('header.ejs') %>
+  <div class="my-following-container">
+    <% users.forEach((user) => { %>
+    <div class="my-following">
+      <div class="id">유저아이디: <%= user.id %></div>
+      <div class="email">이메일: <%= user.email %></div>
+    </div>
+    <% }); %>
+  </div>
+</body>
