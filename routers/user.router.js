@@ -16,6 +16,7 @@ import { s3, randomName, bucketName } from '../utils/aws.js';
 import passport from 'passport';
 import { Strategy as naverStrategy } from 'passport-naver';
 import { Strategy as KakaoStrategy } from 'passport-kakao';
+import { Strategy as googleStrategy} from 'passport-google-oauth20';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -143,6 +144,56 @@ passport.use(
               clientId: kakaoId.toString(),
               email: kakaoEmail,
               name: kakaoDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+
+        
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+    }
+  )
+);
+
+// passport-google
+passport.use(
+  new googleStrategy(
+    {
+      clientID: process.env.CLIENT_ID_GOOGLE,
+      clientSecret: process.env.CLIENT_SECRET_GOOGLE,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(
+        'googleProfile',
+        'accessToken',
+        accessToken,
+        'refreshToken',
+        refreshToken,
+        profile
+      );
+      console.log(profile);
+      try {
+        const googleId = profile.id;
+        const googleEmail = profile?.email[0].value;
+        const googleDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: googleEmail,
+          }
+        })
+        if(exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: googleId,
+              email: googleEmail,
+              name: googleDisplayName,
             },
           });
           done(null, newUser);

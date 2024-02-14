@@ -42,7 +42,7 @@ app.get('/auth/naver',
 app.get('/auth/naver/callback', 
 	passport.authenticate('naver', {
         failureRedirect: '#!/auth/login'
-    }), function(req, res) {
+    }), (req, res) => {
     	res.redirect('/'); 
     });
 
@@ -58,6 +58,13 @@ app.get(
   }
 );
 
+// passport-google
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+)
 app.get('/logout', function(req, res){
 	req.logout();
   req.session.destroy();
