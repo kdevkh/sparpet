@@ -7,7 +7,7 @@ import postRouter from './routers/post.router.js';
 import commentRouter from './routers/comment.router.js';
 import likeRouter from './routers/like.router.js';
 import errorHandlingMiddleware from './middleware/error-handling.middleware.js';
-import 'dotenv/config'
+import 'dotenv/config';
 import session from 'express-session';
 import passport from 'passport';
 
@@ -21,16 +21,14 @@ app.use(cookieParser());
 app.use(session({ secret: 'secret_key'}));
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(express.static('public'));
 
-passport.serializeUser(function (user, done) {
-  done(null, user);
+app.get('/', function(req, res){
+	res.render('index', { user: req.user });
 });
 
-passport.deserializeUser(function (req, user, done) {
-  req.session.sid = user.name;
-  console.log('Session Check' + req.session.sid);
-  done(null, user);
+
+app.get('/login', function(req, res){
+	res.render('login', { user: req.user });
 });
 
 // Setting the naver oauth routes
@@ -43,33 +41,23 @@ app.get('/auth/naver',
 app.get('/auth/naver/callback', 
 	passport.authenticate('naver', {
         failureRedirect: '#!/auth/login'
-    }), (req, res) => {
+    }), function(req, res) {
     	res.redirect('/'); 
     });
 
-// passport-kakao
-app.get('/auth/kakao', passport.authenticate('kakao', { state: 'myStateValue' }));
-app.get(
-  '/auth/kakao/callback',
-  passport.authenticate('kakao', {
-    failureRedirect: '/',
-  }),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
-
-// passport-google
-app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/');
-  }
-)
 app.get('/logout', function(req, res){
 	req.logout();
-  req.session.destroy();
 	res.redirect('/');
+});
+
+
+// Passport 사용자 인증 initialize
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(obj, done) {
+  done(null, obj);
 });
 
 app.use('/refresh', refreshRouter);
