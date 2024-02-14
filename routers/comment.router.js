@@ -10,7 +10,7 @@ const router = express.Router();
 router.post(
   '/:postId/comments',
   jwtValidate,
-  // verifiedEmail,
+  verifiedEmail,
   async (req, res, next) => {
     const user = res.locals.user;
     const postId = req.params.postId;

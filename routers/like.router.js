@@ -11,14 +11,15 @@ const router = express.Router();
 router.post(
   '/post/:postId',
   jwtValidate,
-  // verifiedEmail,
+  verifiedEmail,
   async (req, res, next) => {
     const postId = req.params.postId;
     const user = res.locals.user;
 
     const post = await prisma.posts.findFirst({ where: { id: +postId } });
     if (!post) {
-      return res.status(404).json({ message: '게시물 조회에 실패하였습니다.' });
+      return res.send(`<script>alert('게시물 조회에 실패하였습니다.');window.location.replace('/posts')</script>`)
+      // return res.status(404).json({ message: '게시물 조회에 실패하였습니다.' });
     }
 
     const duplication = await prisma.Likes.findFirst({
@@ -161,7 +162,7 @@ router.post(
       },
     });
 
-    return res.status(201).json({ message: '좋아요 성공' });
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
   }
 );
 

@@ -59,19 +59,19 @@ router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
   const orderValue = req.query.orderValue ?? 'desc';
 
-  if (!['id'].includes(orderKey)) {
-    return res.status(400).json({
-      success: false,
-      message: 'orderKey가 올바르지 않습니다.',
-    });
-  }
+  // if (!['id'].includes(orderKey)) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: 'orderKey가 올바르지 않습니다.',
+  //   });
+  // }
 
-  if (!['asc', 'desc'].includes(orderValue)) {
-    return res.status(400).json({
-      success: false,
-      message: 'orderValue가 올바르지 않습니다.',
-    });
-  }
+  // if (!['asc', 'desc'].includes(orderValue)) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: 'orderValue가 올바르지 않습니다.',
+  //   });
+  // }
 
   const posts = await prisma.posts.findMany({
     select: {
@@ -88,7 +88,7 @@ router.get('/', async (req, res, next) => {
     },
     orderBy: [
       {
-        [orderKey]: orderValue.toLowerCase(),
+        [orderKey]: orderValue
       },
     ],
   });

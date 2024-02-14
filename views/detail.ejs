@@ -47,11 +47,9 @@
                 </div>
                 <div class="space"></div>
                 <% }) %>
-                <div class="newcomment">
-                    <form class="form-box" action='/posts/<%= post.id %>/comments' method="POST"></form>
-                        <input class="comment_input" type="text" name="content" placeholder="댓글을 입력하세요">
-                        <button class="newcomment_btn" type="submit" >등록</button>
-                    </form>
-                </div>
+                <form class="newcomment" action='/posts/<%= post.id %>/comments' method="POST">
+                    <input class="comment_input" type="text" name="content" placeholder="댓글을 입력하세요">
+                    <button class="newcomment_btn" type="submit" >등록</button>
+                </form>
         </div>
 </body>
