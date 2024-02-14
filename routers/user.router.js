@@ -185,7 +185,8 @@ router.post(
     const { email, password, passwordConfirm, name, phone, gender, birth } =
       req.body;
     if (!email) {
-      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-up')</script>`)
     }
     if (!password) {
       return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
@@ -312,13 +313,16 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user)
-      return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      // return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      return res.status(400).send(`<script>alert('존재하지 않는 이메일입니다.');window.location.replace('/sign-in')</script>`)
   } else {
     if (!email) {
-      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
     if (!password) {
-      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      return res.status(400).send(`<script>alert('비밀번호는 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
 
     user = await prisma.users.findFirst({
@@ -328,7 +332,8 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user) {
-      return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      // return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      return res.status(400).send(`<script>alert('잘못된 로그인 정보입니다.');window.location.replace('/sign-in')</script>`)
     }
   }
 
@@ -350,7 +355,8 @@ router.post('/sign-in', async (req, res, next) => {
 router.post('/sign-out', async (req, res, next) => {
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
-  return res.json({ message: '로그아웃 되었습니다.' });
+  // return res.json({ message: '로그아웃 되었습니다.' });
+  return res.redirect('/posts');
 });
 
 // 내 정보 조회

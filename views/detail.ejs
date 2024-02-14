@@ -18,7 +18,7 @@
                     <%= post.createdAt %>
                 </div>
                 <form class="form-box" action='/like/post/<%= post.id %>' method="POST">
-                    <button class="detail_countlike"><i class="fa-solid fa-heart"></i>
+                    <button class="detail_countlike"><i class="fa-solid fa-heart" style="color: red;"></i>
                         <%= post.countlike %>
                     </button>
                 </form>
@@ -27,29 +27,52 @@
                 </div>
             </div>
         </div>
-        <div class="commentcontainer">
-            <% comment.forEach(comment=> { %>
-                <div class="comments">
-                    <div class="comment">
-                        <%= comment.content %>
-                    </div>
-                    <form class="form-box" action='/like/post/<%= post.id %>/comment/<%= comment.id %>' method="POST">
-                        <button class="comment_countlike" type="submit"><i class="fa-solid fa-heart"></i>
-                            <%= comment.countlike %>
-                        </button>
-                    </form>
-                    <form class="form-box" action='/posts/<%= post.id %>/comments/<%= comment.id %>' method="PATCH">
-                        <button class="comment_edit">수정</button>
-                    </form>
-                    <form class="form-box" action='/posts/<%= post.id %>/comments/<%= comment.id %>' method="DELET">
-                        <button class="comment_delete">삭제</button>
-                    </form>
-                </div>
-                <div class="space"></div>
-                <% }) %>
-                <form class="newcomment" action='/posts/<%= post.id %>/comments' method="POST">
-                    <input class="comment_input" type="text" name="content" placeholder="댓글을 입력하세요">
-                    <button class="newcomment_btn" type="submit" >등록</button>
-                </form>
+        <div class="editpost">
+            <button class="post_edit"><a href="/post/<%= post.id %>/edit">수정</a></button>
+            <form class="form-box" action='/posts/<%= post.id %>?_method=DELETE' method="POST">
+                <button class="post_delete">삭제</button>
+            </form>
         </div>
+
+        <div class="commentcontainer">
+            <% comment.forEach((comment, index)=> { %>
+                <div id="comments_<%= index %>" class="comments">
+                    <div class="commentitem">
+                        <div class="comment">
+                            <%= comment.content %>
+                        </div>
+                        <form class="form-box" action='/like/post/<%= post.id %>/comment/<%= comment.id %>'
+                            method="POST">
+                            <button class="comment_countlike" type="submit"><i class="fa-solid fa-heart"
+                                    style="color: red;"></i>
+                                <%= comment.countlike %>
+                            </button>
+                        </form>
+                        <button class="comment_edit" onclick="toggleDisplay('<%= index %>')">수정</button>
+                        <form class="form-box" action='/posts/<%= post.id %>/comments/<%= comment.id %>?_method=DELETE' method="POST">
+                            <button class="comment_delete">삭제</button>
+                        </form>
+                    </div>
+                </div>
+                <form id="editcomment_<%= index %>" class="editcomment"
+                    action='/posts/<%= post.id %>/comments/<%= comment.id %>?_method=PATCH' method="POST">
+                    <input class="comment_input" type="text" name="content" value="<%= comment.content %>"></inputclass>
+                    <button class="comment_edit">수정</button>
+                </form>
+                <div class="space"></div>
+            <% }) %>
+                    <form class="newcomment" action='/posts/<%= post.id %>/comments' method="POST">
+                        <input class="comment_input" type="text" name="content" placeholder="댓글을 입력하세요">
+                        <button class="newcomment_btn" type="submit">등록</button>
+                    </form>
+        </div>
+        <script>
+            function toggleDisplay(commentId) {
+                const editcomment = document.getElementById(`editcomment_${commentId}`)
+                const comment = document.getElementById(`comments_${commentId}`);
+                editcomment.style.display = (editcomment.style.display === 'block') ? 'none' : 'block';
+                comment.style.display = (comment.style.display === 'none') ? 'block' : 'none';
+            }           
+        </script>
 </body>
+

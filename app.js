@@ -10,10 +10,16 @@ import errorHandlingMiddleware from './middleware/error-handling.middleware.js';
 import 'dotenv/config';
 import session from 'express-session';
 import passport from 'passport';
+import methodOverride  from'method-override';
+import { PrismaClient } from '@prisma/client';
+import jwtValidate from './middleware/jwtValidate.middleware.js';
+import verifiedEmail from './middleware/verifiedEmail.middleware.js';
 
 const app = express();
 const PORT = 3000;
 
+const prisma = new PrismaClient();
+app.use(methodOverride('_method'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -22,10 +28,33 @@ app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter, commentRouter);
 app.use('/like', likeRouter);
-app.use(errorHandlingMiddleware);
+// app.use(errorHandlingMiddleware);
 
 app.get('/post/create', async (req,res,next) => {
   res.render('postcreate.ejs');
+})
+
+app.get('/post/:postId/edit', jwtValidate, verifiedEmail, async (req,res,next) => {
+  const {postId} = req.params
+  const user = res.locals.user;
+
+  if (!postId) {
+    return res.status(400).json({
+      success: false,
+      message: 'postId는 필수값입니다.',
+    });
+  }
+
+  const post = await prisma.posts.findFirst({
+    where: {
+      id: Number(postId),
+    }
+  })
+  if (post.userId !== user.id) {
+    return res.status(400).send(`<script>alert('게시물 수정 권한이 없습니다.');window.location.replace('/posts/${post.id}')</script>`);
+  }
+
+  res.render('postedit.ejs',{ post: post });
 })
 
 app.get('/sign-in', async (req,res,next) => {

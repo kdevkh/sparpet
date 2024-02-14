@@ -59,19 +59,19 @@ router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
   const orderValue = req.query.orderValue ?? 'desc';
 
-  // if (!['id'].includes(orderKey)) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: 'orderKey가 올바르지 않습니다.',
-  //   });
-  // }
+  if (!orderKey) {
+    return res.status(400).json({
+      success: false,
+      message: 'orderKey가 올바르지 않습니다.',
+    });
+  }
 
-  // if (!['asc', 'desc'].includes(orderValue)) {
-  //   return res.status(400).json({
-  //     success: false,
-  //     message: 'orderValue가 올바르지 않습니다.',
-  //   });
-  // }
+  if (!['asc', 'desc'].includes(orderValue)) {
+    return res.status(400).json({
+      success: false,
+      message: 'orderValue가 올바르지 않습니다.',
+    });
+  }
 
   const posts = await prisma.posts.findMany({
     select: {
@@ -187,17 +187,17 @@ router.post(
     }
 
     // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
-    const attachFilesString = req.files.map((file) => file.key).join(',');
+    // const attachFilesString = req.files.map((file) => file.key).join(',');
 
     const data = await prisma.posts.create({
       data: {
         title,
         content,
         userId: user.id,
-        attachFile: attachFilesString,
+        // attachFile: attachFilesString,
       },
     });
-    return res.status(201).json({ data });
+    return res.status(201).redirect('/posts');
   }
 );
 
@@ -291,6 +291,7 @@ router.delete(
   jwtValidate,
   verifiedEmail,
   async (req, res, next) => {
+    console.log("제발");
     const user = res.locals.user;
     const postId = req.params.postId;
 
@@ -339,7 +340,8 @@ router.delete(
       where: { id: Number(postId) },
     });
 
-    return res.status(201).end();
+    // return res.status(201).end();
+    return res.status(201).redirect('/posts');
   }
 );
 

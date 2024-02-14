@@ -10,6 +10,7 @@
                         <button class="latest" onclick="sortBy('createdAt', 'desc')">최신순</button>
                         <button class="likes" onclick="sortBy('countlike', 'desc')">좋아요순</button>
                         <button class="views" onclick="sortBy('view', 'desc')">조회수순</button>
+                        <button class="likeviews"><a href="/like/posts">좋아요를 누른 게시물</a></button>
                     </div>
                 </div>
 
@@ -57,7 +58,7 @@
                                     </div>
                                     <div id="username" class="username">작성자 : <%= post.user.name %>
                                     </div>
-                                    <div id="countlike" class="countlike"><i class="fa-solid fa-heart"></i>
+                                    <div id="countlike" class="countlike"><i class="fa-solid fa-heart" style="color: red;"></i>
                                         <%= post.countlike %>
                                     </div>
                                     <div id="createdAt" class="createdAt">작성날짜 : <%= post.createdAt %>

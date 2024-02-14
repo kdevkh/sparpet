@@ -1,0 +1,18 @@
+<body>
+    <%- include('header.ejs') %>
+
+    <h1 class="createpost">게시물 수정</h1>
+    <form class="form-box" action='/posts/<%= post.id %>?_method=PATCH' method="POST">
+        <div class="create_post">
+            <div id="photo" class="createpost_photo">
+                <img src="https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
+            </div>
+            <div id="content" class="createpost_content">
+                <input class="createpost_title_input" type="text" name="title" value="<%= post.title %>">
+                <input class="createpost_content_input" type="text" name="content" value="<%= post.content %>">
+                <button class="createpost_btn" type="submit">게시물 생성</button>
+            </div>
+        </div>
+    </form>
+
+</body>

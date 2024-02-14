@@ -43,7 +43,7 @@ a {
     top: 12px;
 }
 
-.sign_in, .sign_up {
+.sign_in, .sign_up, .sign_out {
     border: 1px solid black;
     border-radius: 50px;
     background-color: transparent;
@@ -62,12 +62,25 @@ a {
     position: absolute;
     right: 13%;
     top: 25px;
+
+    display: block;
 }
 
 .sign_up {
     position: absolute;
     right: 7.5%;
     top: 25px;
+}
+
+.sign_out {
+    position: absolute;
+    right: 14.4%;
+    top: 25px;
+
+    font-size: 15px;
+    width: 100px;
+
+    display: none;
 }
 
 .orderbtn button,
@@ -226,6 +239,26 @@ a {
     right : 100px;
 }
 
+.editpost {
+    display: flex;
+}
+
+.editcomment {
+    display: none;
+}
+
+.post_edit,
+.post_delete {
+    background-color: transparent;
+    border: 1px solid black;
+    width: 100px;
+    height: 50px;
+
+    padding: 8px;
+    margin-left: 15px;
+    margin-top: 15px;
+}
+
 .commentcontainer {
     border: 1px solid black;
     width: 90%;
@@ -241,6 +274,10 @@ a {
     height: 80px;
     padding: 10px;
 
+    display: block;
+}
+
+.commentitem {
     display: flex;
 }
 
@@ -260,6 +297,10 @@ a {
 
     margin-top: 60px;
     margin-left: auto;
+}
+
+.comment_edit {
+    margin-top: 45px;
 }
 
 .space {
