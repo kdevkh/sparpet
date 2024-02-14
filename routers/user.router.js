@@ -34,14 +34,6 @@ passport.use(
       callbackURL,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'naverProfile',
-        'access',
-        accessToken,
-        're',
-        refreshToken,
-        profile
-      );
       console.log(profile);
       try {
         const naverId = profile.id;
@@ -114,14 +106,6 @@ passport.use(
       callbackURL: callbackKakaoURL,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'KakaoProfile',
-        'accessToken',
-        accessToken,
-        'refreshToken',
-        refreshToken,
-        profile
-      );
       console.log(profile);
       try {
         const kakaoId = profile.id;
@@ -167,18 +151,10 @@ passport.use(
       callbackURL: process.env.CALLBACK_URL_GOOGLE,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'googleProfile',
-        'accessToken',
-        accessToken,
-        'refreshToken',
-        refreshToken,
-        profile
-      );
       console.log(profile);
       try {
         const googleId = profile.id;
-        const googleEmail = profile?.email[0].value;
+        const googleEmail = profile.emails[0].value;
         const googleDisplayName = profile.displayName;
 
         const exUser = await prisma.users.findFirst({
