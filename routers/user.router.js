@@ -169,6 +169,12 @@ const upload = multer({ storage: storage });
 const prisma = new PrismaClient();
 const router = express.Router();
 
+console.log(
+  '테스트d',
+  process.env.EMAILSERVICE,
+  process.env.USERMAIL,
+  process.env.PASSWORD
+);
 const transporter = nodemailer.createTransport({
   service: process.env.EMAILSERVICE,
   auth: {

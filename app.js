@@ -9,7 +9,7 @@ import likeRouter from './routers/like.router.js';
 import 'dotenv/config';
 import session from 'express-session';
 import passport from 'passport';
-
+import errorMiddleware from './middleware/error.middleware.js';
 const app = express();
 const PORT = 3000;
 
@@ -90,7 +90,7 @@ app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter, commentRouter);
 app.use('/like', likeRouter);
-
+app.use(errorMiddleware);
 app.listen(PORT, () => {
   console.log(`sparpet app listening on port ${PORT}`);
 });

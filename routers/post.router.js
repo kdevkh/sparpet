@@ -241,21 +241,17 @@ router.patch(
     }
 
     // 사용자가 attachFile을 수정하려고 하면,
-    /** 근데 이렇게 하면 기존 거는 다 지워지고 새 걸로 전부 교체됨... 기존 걸 유지하면서 새 것도 업데이트하려면 db에 컬럼을 여러개 놔야하나? attachFile1, attachFile2..이런식으로? */
-    if (req.files) {
-      // s3에 저장된 기존 것 삭제
-      const existFileNameList = post.attachFile.split(',');
-
-      for (let i = 0; i < existFileNameList.length; i++) {
-        const command = new DeleteObjectCommand({
-          Bucket: bucketName,
-          Key: existFileNameList[i],
-        });
-        try {
-          await s3.send(command);
-        } catch (err) {
-          next(err);
-        }
+    // s3에 저장된 기존 것 삭제
+    const existFileNameList = post.attachFile.split(',');
+    for (let i = 0; i < existFileNameList.length; i++) {
+      const command = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: existFileNameList[i],
+      });
+      try {
+        await s3.send(command);
+      } catch (err) {
+        next(err);
       }
     }
 
