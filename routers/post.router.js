@@ -59,6 +59,7 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
 router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
   const orderValue = req.query.orderValue ?? 'desc';
+  const cookie = req.cookies;
 
   if (!orderKey) {
     return res.status(400).json({
@@ -116,7 +117,7 @@ router.get('/', async (req, res, next) => {
     }
   }
 
-  return res.render('main.ejs', { data: posts });
+  return res.render('main.ejs', { data: posts, cookie:cookie });
 });
 
 // 게시글 상세 조회
@@ -184,10 +185,7 @@ router.get('/:postId', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  // const commentRes = await axios.get(
-  //   `http://localhost:3000/posts/${postId}/comments`
-  // );
-  return res.render('detail.ejs', {post: post, comment: comments });
+  return res.render('detail.ejs', {post: post, comment: comments});
 });
 
 // 게시글 생성
@@ -306,7 +304,7 @@ router.patch(
       },
     });
 
-    return res.status(201).redirect('/posts');
+    return res.status(201).redirect(`/posts/${postId}`);
     //return res.status(201).end();
   }
 );
@@ -378,8 +376,9 @@ router.post(
   verifiedEmail,
   async (req, res, next) => {
     try {
+      const postId = req.params.postId;
       const followingUser = await prisma.posts.findFirst({
-        where: { id: +req.params.postId },
+        where: { id: Number(postId) },
         select: { userId: true },
       }); // B
       const followingUserId = followingUser.userId;
@@ -407,7 +406,8 @@ router.post(
             followingId: +followingUserId,
           },
         });
-        return res.status(201).json({ message: '언팔로우 성공' });
+        // return res.status(201).json({ message: '언팔로우 성공' });
+        return res.status(201).redirect(`/posts/${postId}`);
       }
 
       // A가 B를 팔로우
@@ -417,7 +417,9 @@ router.post(
           followedById: +followedByUserId,
         },
       });
-      return res.status(201).json({ message: '팔로우 성공', followUsers });
+      // return res.status(201).json({ message: '팔로우 성공', followUsers });
+      return res.status(201).redirect(`/posts/${postId}`);
+
     } catch (err) {
       next(err);
     }
