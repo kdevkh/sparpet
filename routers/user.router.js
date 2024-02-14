@@ -175,45 +175,11 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASSWORD,
   },
 });
-
 // 회원가입
 router.post(
   '/sign-up',
   upload.single('profileImage'),
   async (req, res, next) => {
-    const { email, password, passwordConfirm, name, phone, gender, birth } =
-      req.body;
-    if (!email) {
-      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
-      return res
-        .status(400)
-        .send(
-          `<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-up')</script>`
-        );
-    }
-    if (!password) {
-      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
-    }
-    if (!passwordConfirm) {
-      return res.status(400).json({ message: '비밀번호 확인은 필수값입니다.' });
-    }
-    if (password.email < 6) {
-      return res
-        .status(400)
-        .json({ message: '비밀번호는 최소 6자 이상입니다.' });
-    }
-    if (password !== passwordConfirm) {
-      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
-    }
-    if (!name) {
-      return res.status(400).json({ message: '이름은 필수값입니다.' });
-    }
-    if (!gender) {
-      return res.status(400).json({ message: '성별을 입력해주세요.' });
-    }
-    if (!birth) {
-      return res.status(400).json({ message: '생년월일을 입력해주세요.' });
-    }
     try {
       const { email, password, passwordConfirm, name, phone, gender, birth } =
         req.body;
@@ -248,57 +214,66 @@ router.post(
         return res.status(400).json({ message: '생년월일을 입력해주세요.' });
       }
 
-    const user = await prisma.users.findFirst({
-      where: {
-        email,
-      },
-    });
-    if (user) {
-      return res
-        .status(400)
-        .json({ success: false, message: '사용할 수 없는 이메일입니다.' });
+      const user = await prisma.users.findFirst({
+        where: {
+          email,
+        },
+      });
+      if (user) {
+        return res
+          .status(400)
+          .json({ success: false, message: '사용할 수 없는 이메일입니다.' });
+      }
+
+      // profileImage가 req에 존재하면,
+      let imageName = null;
+      if (req.file) {
+        // s3에 저장
+        imageName = randomName();
+        const params = {
+          Bucket: bucketName,
+          Key: imageName,
+          Body: req.file.buffer,
+          ContentType: req.file.mimetype,
+        };
+        const command = new PutObjectCommand(params);
+        await s3.send(command); // command를 s3으로 보낸다.
+      }
+
+      // 이메일 인증 링크 생성
+      const url = `http://localhost:3000/users/verification?email=${email}`;
+
+      // 회원가입 및 이메일 발송 비동기처리
+      Promise.all([
+        prisma.users.create({
+          data: {
+            email,
+            password: sha256(password).toString(),
+            name,
+            phone,
+            gender,
+            birth,
+            profileImage: imageName,
+            isVerified: false,
+          },
+        }),
+        transporter.sendMail({
+          from: 'nodejs.testermail@gmail.com',
+          to: email,
+          subject: '[스파르펫] 회원가입 인증코드',
+          html: `<h3>스파르펫 회원가입 인증코드</h3> <p>아래의 "이메일 인증" 링크를 클릭해주세요</p>
+          <a href="${url}">이메일 인증해버리기</a>`,
+        }),
+      ]);
+
+      // '회원가입 완료' 메시지 즉시 반환
+      return res.status(201).render('verified.ejs');
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: '오류가 발생하였습니다.' });
     }
-
-    // profileImage가 req에 존재하면,
-    const imageName = randomName();
-    if (req.file) {
-      // s3에 저장
-      const params = {
-        Bucket: bucketName,
-        Key: imageName,
-        Body: req.file.buffer,
-        ContentType: req.file.mimetype,
-      };
-      const command = new PutObjectCommand(params);
-      await s3.send(command); // command를 s3으로 보낸다.
-    }
-
-    await prisma.users.create({
-      data: {
-        email,
-        password: sha256(password).toString(),
-        name,
-        phone,
-        gender,
-        birth,
-        profileImage: imageName,
-        isVerified: false,
-      },
-    });
-
-    const url = `http://localhost:3000/users/verification?email=${email}`;
-    await transporter.sendMail({
-      from: 'nodejs.testermail@gmail.com',
-      to: email,
-      subject: '[스파르펫] 회원가입 인증코드',
-      html: `<h3>스파르펫 회원가입 인증코드</h3> <p>아래의 "이메일 인증" 링크를 클릭해주세요</p>
-      <a href="${url}">이메일 인증해버리기</a>`,
-    });
-
-    return res.status(201).render('/verified.ejs');
   }
 );
-
 // 회원가입 email 인증
 router.get('/verification', async (req, res, next) => {
   try {

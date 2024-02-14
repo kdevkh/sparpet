@@ -4,11 +4,7 @@ import jwtValidate from '../middleware/jwtValidate.middleware.js';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
 import { s3, randomName, bucketName } from '../utils/aws.js';
-import {
-  GetObjectCommand,
-  DeleteObjectCommand,
-  ListBucketInventoryConfigurationsCommand,
-} from '@aws-sdk/client-s3';
+import { GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
 
@@ -101,26 +97,30 @@ router.get('/', async (req, res, next) => {
   });
 
   for (let i = 0; i < posts.length; i++) {
-    if (posts[i].attachFile) {
+    if (posts[i].attachFile !== null && posts[i].attachFile !== '') {
       const tmp = posts[i].attachFile
         .split(',')
         .filter((file) =>
           ['jpg', 'jpeg', 'png', 'gif'].includes(file.split('.')[1])
         );
+      if (tmp.length === 0) {
+        posts[i].attachFile =
+          'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
+      } else {
+        const command = new GetObjectCommand({
+          Bucket: bucketName,
+          Key: tmp[0],
+        });
 
-      const command = new GetObjectCommand({
-        Bucket: bucketName,
-        Key: tmp[0],
-      });
-      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
+        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
 
-      posts[i].attachFile = signedUrl;
+        posts[i].attachFile = signedUrl;
+      }
     } else {
       posts[i].attachFile =
         'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
     }
   }
-
   return res.render('main.ejs', { data: posts });
 });
 
@@ -278,8 +278,14 @@ router.patch(
     }
 
     // 사용자가 attachFile을 수정하려고 하면,
-    let attachFilesString = post.attachFile;
-    if (req.files) {
+    let attachFilesString =
+      post.attachFile == ''
+        ? 'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png'
+        : post.attachFile == null
+        ? 'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png'
+        : post.attachFile;
+
+    if (req.files.length !== 0) {
       // s3에 저장된 기존 것 삭제
       const existFileNameList = post.attachFile.split(',');
       for (let i = 0; i < existFileNameList.length; i++) {
@@ -296,7 +302,7 @@ router.patch(
       // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
       attachFilesString = req.files.map((file) => file.key).join(',');
     }
-
+    console.log('3 ', attachFilesString);
     const data = await prisma.posts.update({
       where: {
         id: Number(postId),
@@ -307,7 +313,7 @@ router.patch(
         attachFile: attachFilesString,
       },
     });
-
+    console.log('4 ', data);
     return res.status(201).redirect('/posts');
     //return res.status(201).end();
   }
@@ -319,7 +325,6 @@ router.delete(
   jwtValidate,
   verifiedEmail,
   async (req, res, next) => {
-    console.log('제발');
     const user = res.locals.user;
     const postId = req.params.postId;
 
@@ -390,10 +395,16 @@ router.post(
 
       const followedByUserId = res.locals.user.id; // A = me
       // 자기자신 팔로우 불가
-      if (followingUserId == followedByUserId)
+      if (followingUserId == followedByUserId) {
         return res
           .status(400)
-          .json({ message: '자기자신을 팔로우할 수 없습니다.' });
+          .send(
+            `<script>alert('자기자신을 팔로우할 수 없습니다.');history.back();</script>`
+          );
+        // return res
+        // .status(400)
+        // .json({ message: '자기자신을 팔로우할 수 없습니다.' });
+      }
 
       // 이미 팔로우한 user인지 확인 -> 언팔로우
       const isExistfollowingUser = await prisma.follows.findMany({
@@ -409,8 +420,9 @@ router.post(
             followingId: +followingUserId,
           },
         });
-        console.log('언팔로우 성공', isExistfollowingUser);
-        return res.redirect('back');
+        return res
+          .status(400)
+          .send(`<script>alert('언팔로우 성공!');history.back();</script>`);
         //return res.status(201).json({ message: '언팔로우 성공' });
       }
 
@@ -421,8 +433,10 @@ router.post(
           followedById: +followedByUserId,
         },
       });
-      console.log('팔로우 성공', isExistfollowingUser, followUsers);
-      res.redirect('back');
+
+      return res
+        .status(400)
+        .send(`<script>alert('팔로우 성공!');history.back();</script>`);
       //return res.status(201).json({ message: '팔로우 성공', followUsers });
     } catch (err) {
       next(err);
