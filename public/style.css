@@ -536,13 +536,37 @@ video {
 }
 
 .profile {
-    width: 95%;
-    height: 700px;
+    width: 50%;
 
-    margin-left: 2%;
+    margin-left: 25%;
     margin-top: 50px;
 
     border: 1px solid black;
 
     
+}
+
+.profile div,
+.profile input {
+    width: 80%;
+    height: 50px;
+
+    margin-left: 10%;
+    margin-top: 15px;
+    margin-bottom: 30px;
+
+    text-align: center;
+
+    font-size: 21px;
+}
+
+.user_edit {
+    background-color: transparent;
+    border: 1px solid black;
+    width: 100px;
+    height: 50px;
+
+    padding: 8px;
+    margin-left: 68%;
+    margin-top: 25px;
 }

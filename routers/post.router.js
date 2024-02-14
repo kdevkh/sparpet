@@ -43,7 +43,8 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
   });
 
   if (followingUsersIdList.length == 0)
-    return res.status(404).json({ message: '게시물이 없습니다.' });
+    // return res.status(404).json({ message: '게시물이 없습니다.' });
+    return res.status(404).send("<script>alert('게시물이 없습니다.');window.location.replace('/posts')</script>")
   followingUsersIdList = followingUsersIdList.map((v) => v.id);
 
   const posts = await prisma.posts.findMany({
@@ -51,7 +52,7 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       userId: { in: followingUsersIdList },
     },
   });
-  return res.status(200).json({ posts });
+  return res.status(200).render('main.ejs',{ data:posts });
 });
 
 // 게시글 목록 조회

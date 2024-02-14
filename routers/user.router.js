@@ -186,34 +186,42 @@ router.post(
       const { email, password, passwordConfirm, name, phone, gender, birth } =
         req.body;
       if (!email) {
-        return res.status(400).json({ message: '이메일은 필수값입니다.' });
+        // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+        return res.status(404).send("<script>alert('이메일은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (!password) {
-        return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+        // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+        return res.status(404).send("<script>alert('비밀번호는 필수값입니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (!passwordConfirm) {
-        return res
-          .status(400)
-          .json({ message: '비밀번호 확인은 필수값입니다.' });
+        // return res
+        //   .status(400)
+        //   .json({ message: '비밀번호 확인은 필수값입니다.' });
+        return res.status(404).send("<script>alert('비밀번호 확인은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (password.email < 6) {
-        return res
-          .status(400)
-          .json({ message: '비밀번호는 최소 6자 이상입니다.' });
+        // return res
+        //   .status(400)
+        //   .json({ message: '비밀번호는 최소 6자 이상입니다.' });
+        return res.status(404).send("<script>alert('비밀번호는 최소 6자 이상입니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (password !== passwordConfirm) {
-        return res
-          .status(400)
-          .json({ message: '비밀번호가 일치하지 않습니다.' });
+        // return res
+        //   .status(400)
+        //   .json({ message: '비밀번호가 일치하지 않습니다.' });
+        return res.status(404).send("<script>alert('비밀번호가 일치하지 않습니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (!name) {
-        return res.status(400).json({ message: '이름은 필수값입니다.' });
+        // return res.status(400).json({ message: '이름은 필수값입니다.' });
+        return res.status(404).send("<script>alert('이름은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
       }
       if (!gender) {
-        return res.status(400).json({ message: '성별을 입력해주세요.' });
+        // return res.status(400).json({ message: '성별을 입력해주세요.' });
+        return res.status(404).send("<script>alert('성별을 입력해주세요.');window.location.replace('/users/sign-up')</script>")
       }
       if (!birth) {
-        return res.status(400).json({ message: '생년월일을 입력해주세요.' });
+        // return res.status(400).json({ message: '생년월일을 입력해주세요.' });
+        return res.status(404).send("<script>alert('생년월일을 입력해주세요.');window.location.replace('/users/sign-up')</script>")
       }
 
       const user = await prisma.users.findFirst({
@@ -485,10 +493,11 @@ router.patch(
       },
     });
 
-    return res.json({
-      message: '사용자 정보가 업데이트되었습니다.',
-      data: updatedUser,
-    });
+    // return res.json({
+    //   message: '사용자 정보가 업데이트되었습니다.',
+    //   data: updatedUser,
+    // });
+    return res.redirect('/users/profile');
   }
 );
 
@@ -510,7 +519,7 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
         email: true,
       },
     });
-    return res.status(200).json({ followingUsers });
+    return res.status(200).render('following.ejs',{user : followingUsers})
   } catch (err) {
     next(err);
   }
@@ -535,7 +544,7 @@ router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
       },
     });
 
-    return res.status(200).json({ followers });
+    return res.status(200).render('follower.ejs',{user : followers})
   } catch (err) {
     next(err);
   }

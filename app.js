@@ -33,6 +33,12 @@ app.get('/post/create', async (req,res,next) => {
   res.render('postcreate.ejs');
 })
 
+app.get('/profile', jwtValidate, verifiedEmail, async (req,res,next) => {
+  const user = res.locals.user;
+
+  res.render('useredit.ejs', {user : user});
+})
+
 app.get('/post/:postId/edit', jwtValidate, verifiedEmail, async (req,res,next) => {
   const {postId} = req.params
   const user = res.locals.user;

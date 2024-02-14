@@ -1,0 +1,17 @@
+<body>
+    <%- include('header.ejs') %>
+
+    <h1 class="createpost">사용자 정보 조회</h1>
+    <form class="form-box" action='/users/profile?_method=PATCH' method="POST" enctype="multipart/form-data">
+        <div class="profile">
+            <input type="file" name="attachFile" accept="image/*, video/*" multiple />
+            <input name="email" type="email" value="<%= user.email %>" >
+            <input name="name" type="text" value="<%= user.name %>"" >
+            <input name="phone" type="text" value="<%= user.phone %>"" >
+            <input name="gender" type="text" value="<%= user.gender %>"" >
+            <input name="birth" type="date" value="<%= user.birth %>"" >
+        </div>
+        <button class="user_edit" type="submit">수정</a></button>
+    </form>
+
+</body>
