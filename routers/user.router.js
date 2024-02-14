@@ -188,6 +188,7 @@ router.post(
   '/sign-up',
   upload.single('profileImage'),
   async (req, res, next) => {
+<<<<<<< HEAD
     try {
       const { email, password, passwordConfirm, name, phone, gender, birth } =
         req.body;
@@ -221,6 +222,37 @@ router.post(
       if (!birth) {
         return res.status(400).json({ message: '생년월일을 입력해주세요.' });
       }
+=======
+    const { email, password, passwordConfirm, name, phone, gender, birth } =
+      req.body;
+    if (!email) {
+      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-up')</script>`)
+    }
+    if (!password) {
+      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+    }
+    if (!passwordConfirm) {
+      return res.status(400).json({ message: '비밀번호 확인은 필수값입니다.' });
+    }
+    if (password.email < 6) {
+      return res
+        .status(400)
+        .json({ message: '비밀번호는 최소 6자 이상입니다.' });
+    }
+    if (password !== passwordConfirm) {
+      return res.status(400).json({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+    if (!name) {
+      return res.status(400).json({ message: '이름은 필수값입니다.' });
+    }
+    if (!gender) {
+      return res.status(400).json({ message: '성별을 입력해주세요.' });
+    }
+    if (!birth) {
+      return res.status(400).json({ message: '생년월일을 입력해주세요.' });
+    }
+>>>>>>> 4743479df0cd445d3c109ffef79ed066f06f86ea
 
       const user = await prisma.users.findFirst({
         where: {
@@ -283,6 +315,51 @@ router.post(
       console.error(error);
       return res.status(500).json({ message: '오류가 발생하였습니다.' });
     }
+<<<<<<< HEAD
+=======
+
+    // profileImage가 req에 존재하면,
+    const imageName = randomName();
+    if (req.file) {
+      // s3에 저장
+      // 그 전에 320x320px로 리사이징
+      const imageBuffer = await sharp(req.file.buffer)
+        .resize({ height: 320, width: 320, fit: 'contain' })
+        .toBuffer();
+      const params = {
+        Bucket: bucketName,
+        Key: imageName,
+        Body: imageBuffer,
+        ContentType: req.file.mimetype,
+      };
+      const command = new PutObjectCommand(params);
+      await s3.send(command); // command를 s3으로 보낸다.
+    }
+
+    await prisma.users.create({
+      data: {
+        email,
+        password: sha256(password).toString(),
+        name,
+        phone,
+        gender,
+        birth,
+        profileImage: imageName,
+        isVerified: false,
+      },
+    });
+
+    const url = `http://localhost:3000/users/verification?email=${email}`;
+    await transporter.sendMail({
+      from: 'nodejs.testermail@gmail.com',
+      to: email,
+      subject: '[스파르펫] 회원가입 인증코드',
+      html: `<h3>스파르펫 회원가입 인증코드</h3> <p>아래의 "이메일 인증" 링크를 클릭해주세요</p>
+      <a href="${url}">이메일 인증해버리기</a>`,
+    });
+
+    return res.status(201).render('/verified.ejs');
+>>>>>>> 4743479df0cd445d3c109ffef79ed066f06f86ea
   }
 );
 
@@ -313,7 +390,7 @@ router.get('/verification', async (req, res, next) => {
       data: { isVerified: true },
     });
 
-    return res.status(201).send({ message: '이메일 인증이 완료되었습니다.' });
+    return res.status(201).render('sign-in.ejs');
   } catch (err) {
     console.error(err);
     return res.status(400).send({ message: '오류가 발생하였습니다.' });
@@ -332,13 +409,16 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user)
-      return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      // return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      return res.status(400).send(`<script>alert('존재하지 않는 이메일입니다.');window.location.replace('/sign-in')</script>`)
   } else {
     if (!email) {
-      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
     if (!password) {
-      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      return res.status(400).send(`<script>alert('비밀번호는 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
 
     user = await prisma.users.findFirst({
@@ -348,7 +428,8 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user) {
-      return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      // return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      return res.status(400).send(`<script>alert('잘못된 로그인 정보입니다.');window.location.replace('/sign-in')</script>`)
     }
   }
 
@@ -363,14 +444,15 @@ router.post('/sign-in', async (req, res, next) => {
   res.cookie('refreshToken', refreshToken);
   res.cookie('isVerified', user.isVerified);
 
-  return res.json({ accessToken, refreshToken });
+  return res.redirect('/posts');
 });
 
 // 로그아웃
 router.post('/sign-out', async (req, res, next) => {
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
-  return res.json({ message: '로그아웃 되었습니다.' });
+  // return res.json({ message: '로그아웃 되었습니다.' });
+  return res.redirect('/posts');
 });
 
 // 내 정보 조회

@@ -15,6 +15,7 @@ router.post(
     const user = res.locals.user;
     const postId = req.params.postId;
     const { content } = req.body;
+    console.log("성공");
 
     if (!content) {
       return res.status(400).json({
@@ -31,7 +32,7 @@ router.post(
       },
     });
 
-    return res.status(201).json({});
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
   }
 );
 
@@ -50,7 +51,7 @@ router.get('/:postId/comments', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  return res.json({ data: comments });
+  return res.json({ comment: comments });
 });
 
 // 댓글 수정
@@ -64,10 +65,12 @@ router.patch(
     const { content } = req.body;
 
     if (!content) {
-      return res.status(400).json({
-        success: false,
-        message: '수정 내용을 입력해주세요.',
-      });
+      // return res.status(400).json({
+      //   success: false,
+      //   message: '수정 내용을 입력해주세요.',
+      // });
+      return res.status(400).send(`<script>alert('수정 내용을 입력해주세요.');window.location.replace('/posts/${Number(postId)}')</script>`)
+
     }
 
     const updatedComment = await prisma.comments.findFirst({
@@ -85,10 +88,12 @@ router.patch(
     }
 
     if (updatedComment.userId !== user.id) {
-      return res.status(400).json({
-        success: false,
-        message: '댓글을 수정할 권한이 없습니다.',
-      });
+      // return res.status(400).json({
+      //   success: false,
+      //   message: '댓글을 수정할 권한이 없습니다.',
+      // });
+      return res.status(400).send(`<script>alert('댓글을 수정할 권한이 없습니다.');window.location.replace('/posts/${Number(postId)}')</script>`)
+
     }
 
     await prisma.comments.update({
@@ -100,7 +105,7 @@ router.patch(
       },
     });
 
-    return res.status(200).end();
+    return res.status(200).redirect(`/posts/${Number(postId)}`);
   }
 );
 
@@ -128,10 +133,11 @@ router.delete(
     }
 
     if (comment.userId !== user.id) {
-      return res.status(400).json({
-        success: false,
-        message: '댓글을 삭제할 권한이 없습니다.',
-      });
+      // return res.status(400).json({
+      //   success: false,
+      //   message: '댓글을 삭제할 권한이 없습니다.',
+      // });
+      return res.status(400).send(`<script>alert('댓글을 삭제할 권한이 없습니다.');window.location.replace('/posts/${Number(postId)}')</script>`)
     }
 
     await prisma.comments.delete({
@@ -140,7 +146,7 @@ router.delete(
       },
     });
 
-    return res.status(200).json({ message: '댓글이 삭제되었습니다.' });
+    return res.status(200).redirect(`/posts/${Number(postId)}`)
   }
 );
 

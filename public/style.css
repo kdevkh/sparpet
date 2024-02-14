@@ -1,0 +1,444 @@
+button {
+    cursor: pointer;
+}
+
+.header {
+    width: auto;
+    height: 80px;
+    position: relative;
+    margin-top: 30px;
+}
+
+.logo {
+    font-size: 60px;
+    margin-left: 50px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.search {
+    position: absolute;
+    top: 15px;
+    left: 35%;
+}
+
+.search_input {
+    width: 500px;
+    height: 45px;
+    border-radius: 50px;
+    border: 1px solid black;
+    text-align: center;
+    font-size: 18px;
+}
+
+.search_button {
+    font-size: 20px;
+    border: none;
+    background-color: transparent;
+
+    position: absolute;
+    left: 15px;
+    top: 12px;
+}
+
+.sign_in, .sign_up, .sign_out {
+    border: 1px solid black;
+    border-radius: 50px;
+    background-color: transparent;
+    text-align: center;
+
+    padding: 8px;
+
+    width: 80px;
+}
+
+.sign_in {
+    margin-right: 25px;
+}
+
+.sign_in {
+    position: absolute;
+    right: 13%;
+    top: 25px;
+
+    display: block;
+}
+
+.sign_up {
+    position: absolute;
+    right: 7.5%;
+    top: 25px;
+}
+
+.sign_out {
+    position: absolute;
+    right: 14.4%;
+    top: 25px;
+
+    font-size: 15px;
+    width: 100px;
+
+    display: none;
+}
+
+.orderbtn button,
+.newpost {
+    border: 1px solid black;
+    background-color: transparent;
+    padding: 8px;
+
+    width: 80px;
+}
+
+.orderbtn {
+    display: flex;
+
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+
+/* -----메인페이지-------- */
+
+.postcontainer {
+    border: 3px solid black;
+    padding: 50px;
+
+    margin-top: 50px;
+}
+
+.posts {
+    width: 94%;
+
+    display: grid;
+    grid-template-columns: repeat(4, 350px);
+    grid-auto-rows: auto;
+
+    grid-column-gap: 80px;
+    grid-row-gap: 200px;
+}
+
+.post {
+    display: flex;
+    width: 330px;
+    flex-direction: column;
+
+    color: black;
+    padding: 10px;
+
+    border: 1px solid black;
+    background-color: white;
+}
+
+.photo img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+
+    border: 1px solid black;
+}
+
+.content {
+    margin : 15px 10px 10px 10px
+}
+
+.title {
+    font-size: 30px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.username {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.countlike {
+    font-size: 20px;
+    margin-left: 260px;
+
+    border: transparent;
+    background-color: transparent;
+}
+
+.view {
+    text-align-last: right;
+    margin-top: 25px;
+}
+
+/* --------상세페이지---------- */
+.detail_post,
+.create_post {
+    border: 1px solid black;
+    padding: 30px;
+    height: 600px;
+    align-items: center;
+    margin-top: 50px;
+    width: 96%;
+
+    display: flex;
+}
+
+.detail_photo {
+    width: 50%;
+}
+
+.detail_contents,
+.createpost_content {
+    border: 1px solid black;
+    width: 75%;
+    height: 500px;
+    margin-left: 5%;
+
+    padding: 25px;
+
+    position: relative;
+}
+
+.detail_title {
+    font-size: 50px;
+    text-align: center;
+
+    margin-bottom: 50px;
+}
+
+.detail_username {
+    font-size: 18px;
+    text-align: end;
+
+    margin-bottom: 50px;
+}
+
+.detail_content {
+    font-size: 25px;
+    text-align: center;
+}
+
+.detail_createdAt {
+    position: absolute;
+    bottom: 30px;
+}
+
+.detail_countlike {
+    position: absolute;
+    bottom: 30px;
+    right : 30px;
+
+    font-size: 18px;
+    border: transparent;
+    background-color: transparent;
+}
+
+.detail_view {
+    font-size: 18px;
+
+    position: absolute;
+    bottom: 30px;
+    right : 100px;
+}
+
+.editpost {
+    display: flex;
+}
+
+.editcomment {
+    display: none;
+}
+
+.post_edit,
+.post_delete {
+    background-color: transparent;
+    border: 1px solid black;
+    width: 100px;
+    height: 50px;
+
+    padding: 8px;
+    margin-left: 15px;
+    margin-top: 15px;
+}
+
+.commentcontainer {
+    border: 1px solid black;
+    width: 90%;
+
+    padding: 25px;
+    margin-top: 50px;
+    margin-bottom: 300px;
+    margin-left: 5%;
+}
+
+.comments {
+    border: 1px solid black;
+    height: 80px;
+    padding: 10px;
+
+    display: block;
+}
+
+.commentitem {
+    display: flex;
+}
+
+.comment {
+    margin : 18px 0 15px 15px;
+    font-size: 18px;
+}
+
+.comment_countlike,
+.comment_edit,
+.comment_delete {
+    border: transparent;
+    background-color: transparent;
+    padding: 5px;
+
+    font-size: 15px;
+
+    margin-top: 60px;
+    margin-left: auto;
+}
+
+.comment_edit {
+    margin-top: 45px;
+}
+
+.space {
+    height: 30px;
+}
+
+.comment_input {
+    height: 50px;
+    padding: 10px;
+    width: 80%;
+    margin-left: 6% ;
+}
+
+.newcomment {
+    display: flex;
+
+    margin-top: 50px;
+}
+
+.comment_input {
+    width: 1200px;
+}
+
+.newcomment_btn {
+    border: 1px solid black;
+    background-color: transparent;
+    height: 50px;
+    width: 100px;
+    margin-left: 5px;
+}
+
+/* -----새 게시물 작성----- */
+.createpost {
+    border: 1px solid black;
+    text-align: center;
+
+    padding: 25px;
+    margin-top: 80px;
+}
+
+.createpost_title_input {
+    width: 100%;
+    height: 50px;
+
+    margin-bottom: 50px;
+}
+
+.createpost_content_input {
+    width: 100%;
+    height: 100px;
+}
+
+.createpost_btn {
+    border: 1px solid black;
+    border-radius: 50px;
+    margin-top: 280px;
+    margin-left: 88%;
+    background-color: transparent;
+
+    padding: 8px;
+
+    width: 100px;
+}
+
+/* -----로그인페이지----- */
+
+.sign-in {
+    border: 1px solid black;
+    padding: 30px;
+
+    width: 30%;
+    height: 500px;
+    margin-left: 32%;
+    margin-top: 50px;
+}
+
+.email, 
+.password,
+.name,
+.gender,
+.birth {
+    margin: 30px 0 30px 50px;
+}
+
+.passwordConfirm {
+    margin: 30px 0 30px 18px;
+}
+
+.phone {
+    margin: 30px 0 30px 30px;
+}
+
+.email_input {
+    margin-left: 23px;
+    width: 300px;
+    height: 30px;
+    padding: 5px;
+}
+
+.phone_input {
+    margin-left: 18px;
+    width: 300px;
+    height: 30px;
+    padding: 5px;
+}
+
+.M_input,
+.F_input {
+    margin-left: 30px;
+    width: 80px;
+    height: 15px;
+    padding: 5px;
+}
+
+.name_input {
+    margin-left: 38px;
+    width: 300px;
+    height: 30px;
+    padding: 5px;
+}
+
+.password_input,
+.birth_input,
+.passwordConfirm_input {
+    margin-left: 10px;
+    width: 300px;
+    height: 30px;
+    padding: 5px;
+}
+
+.sign-btn {
+    border: 1px solid black;
+    /* border-radius: 50px; */
+    
+    background-color: transparent;
+
+    padding: 15px;
+
+    margin-left: 40%;
+    margin-top: 25px;
+}
