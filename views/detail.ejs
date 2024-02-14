@@ -7,22 +7,51 @@
             </div>
             <div class="detail_contents">
                 <div class="detail_title">
-                    <%= data.title %>
+                    <%= post.title %>
                 </div>
-                <div class="detail_username">작성자 : <%= data.user.name %>
+                <div class="detail_username">작성자 : <%= post.user.name %>
                 </div>
                 <div class="detail_content">
-                    <%= data.content %>
+                    <%= post.content %>
                 </div>
                 <div class="detail_createdAt">
-                    <%= data.createdAt %>
+                    <%= post.createdAt %>
                 </div>
-                <div class="detail_countlike"><i class="fa-solid fa-heart"></i>
-                    <%= data.countlike %>
-                </div>
+                <form class="form-box" action='/like/post/<%= post.id %>' method="POST">
+                    <button class="detail_countlike"><i class="fa-solid fa-heart"></i>
+                        <%= post.countlike %>
+                    </button>
+                </form>
                 <div class="detail_view">
-                    조회수 : <%= data.view %>
+                    조회수 : <%= post.view %>
                 </div>
             </div>
+        </div>
+        <div class="commentcontainer">
+            <% comment.forEach(comment=> { %>
+                <div class="comments">
+                    <div class="comment">
+                        <%= comment.content %>
+                    </div>
+                    <form class="form-box" action='/like/post/<%= post.id %>/comment/<%= comment.id %>' method="POST">
+                        <button class="comment_countlike"><i class="fa-solid fa-heart"></i>
+                            <%= comment.countlike %>
+                        </button>
+                    </form>
+                    <form class="form-box" action='/posts/<%= post.id %>/comments/<%= comment.id %>' method="PATCH">
+                        <button class="comment_edit">수정</button>
+                    </form>
+                    <form class="form-box" action='/posts/<%= post.id %>/comments/<%= comment.id %>' method="DELET">
+                        <button class="comment_delete">삭제</button>
+                    </form>
+                </div>
+                <div class="space"></div>
+                <% }) %>
+                <div class="newcomment">
+                    <input class="comment_input" type="text" placeholder="댓글을 입력하세요">
+                    <form class="form-box" action='/posts/<%= post.id %>/comments' method="POST">
+                        <button class="newcomment_btn">등록</button>
+                    </form>
+                </div>
         </div>
 </body>

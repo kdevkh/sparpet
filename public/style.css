@@ -70,7 +70,7 @@ a {
     top: 25px;
 }
 
-/* ------post-------- */
+/* -----메인페이지-------- */
 
 .postcontainer {
     border: 3px solid black;
@@ -146,6 +146,7 @@ a {
     height: 600px;
     align-items: center;
     margin-top: 50px;
+    width: 96%;
 
     display: flex;
 }
@@ -196,6 +197,8 @@ a {
     right : 30px;
 
     font-size: 18px;
+    border: transparent;
+    background-color: transparent;
 }
 
 .detail_view {
@@ -206,6 +209,66 @@ a {
     right : 100px;
 }
 
+.commentcontainer {
+    border: 1px solid black;
+    width: 90%;
+
+    padding: 25px;
+    margin-top: 50px;
+    margin-bottom: 300px;
+    margin-left: 5%;
+}
+
+.comments {
+    border: 1px solid black;
+    height: 80px;
+    padding: 10px;
+
+    display: flex;
+}
+
+.comment {
+    margin : 18px 0 15px 15px;
+    font-size: 18px;
+}
+
+.comment_countlike,
+.comment_edit,
+.comment_delete {
+    border: transparent;
+    background-color: transparent;
+    padding: 5px;
+
+    font-size: 15px;
+
+    margin-top: 60px;
+    margin-left: auto;
+}
+
+.space {
+    height: 30px;
+}
+
+.comment_input {
+    height: 50px;
+    padding: 10px;
+    width: 80%;
+    margin-left: 6% ;
+}
+
+.newcomment {
+    display: flex;
+}
+
+.newcomment_btn {
+    border: 1px solid black;
+    background-color: transparent;
+    height: 50px;
+    width: 100px;
+    margin-left: 5px;
+}
+
+/* -----새 게시물 작성----- */
 .createpost {
     border: 1px solid black;
     text-align: center;
@@ -237,6 +300,8 @@ a {
 
     width: 100px;
 }
+
+/* -----로그인페이지----- */
 
 .sign-in {
     border: 1px solid black;

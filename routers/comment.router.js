@@ -44,7 +44,7 @@ router.get('/:postId/comments', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  return res.json({ data: comments });
+  return res.json({ comment: comments });
 });
 
 // 댓글 수정
