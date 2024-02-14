@@ -16,7 +16,6 @@ const PORT = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('public'));
 app.use('/refresh', refreshRouter);
@@ -40,3 +39,62 @@ app.get('/sign-in', async (req,res,next) => {
 app.get('/sign-up', async (req,res,next) => {
   res.render('sign-up.ejs');
 })
+
+// passport-naver
+app.use(session({ secret: 'secret_key'}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(express.static('public'));
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (req, user, done) {
+  req.session.sid = user.name;
+  console.log('Session Check' + req.session.sid);
+  done(null, user);
+});
+
+// Setting the naver oauth routes
+app.get('/auth/naver', 
+   passport.authenticate('naver', null), function(req, res) { // @todo Additional handler is necessary. Remove?
+       console.log('/auth/naver failed, stopped');
+    });
+
+// creates an account if no account of the new user
+app.get('/auth/naver/callback', 
+   passport.authenticate('naver', {
+        failureRedirect: '#!/auth/login'
+    }), (req, res) => {
+       res.redirect('/'); 
+    });
+
+// passport-kakao
+app.get('/auth/kakao', passport.authenticate('kakao', { state: 'myStateValue' }));
+app.get(
+  '/auth/kakao/callback',
+  passport.authenticate('kakao', {
+    failureRedirect: '/',
+  }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
+// passport-google
+app.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+)
+app.get('/logout', function(req, res){
+   req.logout();
+  req.session.destroy();
+   res.redirect('/');
+});
+
+app.listen(PORT, () => {
+  console.log(`sparpet app listening on port ${PORT}`);
+});
