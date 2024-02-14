@@ -1,22 +1,39 @@
 import express from 'express';
 import { PrismaClient } from '@prisma/client';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
+import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
 
 const prisma = new PrismaClient();
 const router = express.Router();
 
 //댓글 생성
-router.post('/:postId/comments', jwtValidate, async (req, res, next) => {
-  const user = res.locals.user;
-  const postId = req.params.postId;
-  const { content } = req.body;
+router.post(
+  '/:postId/comments',
+  jwtValidate,
+  verifiedEmail,
+  async (req, res, next) => {
+    const user = res.locals.user;
+    const postId = req.params.postId;
+    const { content } = req.body;
 
-  if (!content) {
-    return res.status(400).json({
-      success: false,
-      message: '댓글을 입력해주세요.',
+    if (!content) {
+      return res.status(400).json({
+        success: false,
+        message: '댓글을 입력해주세요.',
+      });
+    }
+
+    await prisma.comments.create({
+      data: {
+        content,
+        postId: Number(postId),
+        userId: user.id,
+      },
     });
+
+    return res.status(201).json({});
   }
+<<<<<<< HEAD
 
   await prisma.comments.create({
     data: {
@@ -29,6 +46,9 @@ router.post('/:postId/comments', jwtValidate, async (req, res, next) => {
   //return res.status(201).json({});
   res.redirect('back');
 });
+=======
+);
+>>>>>>> d01d1e303be157c815931573f461493b4ebd84dc
 
 // 댓글 조회
 router.get('/:postId/comments', async (req, res, next) => {
@@ -52,6 +72,7 @@ router.get('/:postId/comments', async (req, res, next) => {
 router.patch(
   '/:postId/comments/:commentId',
   jwtValidate,
+  verifiedEmail,
   async (req, res, next) => {
     const user = res.locals.user;
     const { postId, commentId } = req.params;
@@ -102,6 +123,7 @@ router.patch(
 router.delete(
   '/:postId/comments/:commentId',
   jwtValidate,
+  verifiedEmail,
   async (req, res, next) => {
     const user = res.locals.user;
     const { postId, commentId } = req.params;

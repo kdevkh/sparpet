@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client';
 import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
+import nodemailer from 'nodemailer';
+import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
 
 import multer from 'multer';
 import {
@@ -15,31 +17,21 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, randomName, bucketName } from '../utils/aws.js';
 import passport from 'passport';
 import { Strategy as naverStrategy } from 'passport-naver';
+import { Strategy as KakaoStrategy } from 'passport-kakao';
+import { Strategy as googleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 // passport-naver
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = process.env.CALLBACK_URL;
-
 passport.use(
   new naverStrategy(
     {
-      clientID,
-      clientSecret,
-      callbackURL,
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'naverProfile',
-        'access',
-        accessToken,
-        're',
-        refreshToken,
-        profile
-      );
       console.log(profile);
       try {
         const naverId = profile.id;
@@ -48,21 +40,27 @@ passport.use(
         const naverGender = profile.gender;
         const naverBirth = profile.birthday;
         const naverPhone = profile.phone;
-        // const provider = 'naver',
-        // const naver = profile._json
 
-        const newUser = await prisma.users.create({
-          data: {
-            clientId: naverId,
+        const exUser = await prisma.users.findFirst({
+          where: {
             email: naverEmail,
-            name: naverDisplayName,
-            gender: naverGender,
-            birth: naverBirth,
-            phone: naverPhone,
           },
         });
-
-        done(null, newUser);
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: naverId,
+              email: naverEmail,
+              name: naverDisplayName,
+              gender: naverGender,
+              birth: naverBirth,
+              phone: naverPhone,
+            },
+          });
+          done(null, newUser);
+        }
       } catch (error) {
         console.error('Error creating user: ', error);
         done(error, null);
@@ -81,12 +79,103 @@ passport.use(
   )
 );
 
+// passport-kakao
+passport.use(
+  new KakaoStrategy(
+    {
+      clientID: process.env.CLIENT_ID_KAKAO,
+      clientSecret: process.env.CLIENT_SECRET_KAKAO,
+      callbackURL: process.env.CALLBACK_URL_KAKAO,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      try {
+        const kakaoId = profile.id;
+        const kakaoEmail =
+          profile._json &&
+          profile._json.kakao_account &&
+          profile._json.kakao_account.email;
+        const kakaoDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: kakaoEmail,
+          },
+        });
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: kakaoId.toString(),
+              email: kakaoEmail,
+              name: kakaoDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+    }
+  )
+);
+
+// passport-google
+passport.use(
+  new googleStrategy(
+    {
+      clientID: process.env.CLIENT_ID_GOOGLE,
+      clientSecret: process.env.CLIENT_SECRET_GOOGLE,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      try {
+        const googleId = profile.id;
+        const googleEmail = profile.emails[0].value;
+        const googleDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: googleEmail,
+          },
+        });
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: googleId,
+              email: googleEmail,
+              name: googleDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+    }
+  )
+);
+
 // multer
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+const transporter = nodemailer.createTransport({
+  service: process.env.EMAILSERVICE,
+  auth: {
+    user: process.env.USERMAIL,
+    pass: process.env.PASSWORD,
+  },
+});
 
 // 회원가입
 router.post(
@@ -160,12 +249,56 @@ router.post(
         gender,
         birth,
         profileImage: imageName,
+        isVerified: false,
       },
+    });
+
+    const url = `http://localhost:3000/users/verification?email=${email}`;
+    await transporter.sendMail({
+      from: 'nodejs.testermail@gmail.com',
+      to: email,
+      subject: '[스파르펫] 회원가입 인증코드',
+      html: `<h3>스파르펫 회원가입 인증코드</h3> <p>아래의 "이메일 인증" 링크를 클릭해주세요</p>
+      <a href="${url}">이메일 인증해버리기</a>`,
     });
 
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
   }
 );
+
+// 회원가입 email 인증
+router.get('/verification', async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    if (!email)
+      return res.status(412).send({ message: '비정상적인 접근입니다.' });
+
+    const verifiedEmail = await prisma.users.findFirst({
+      where: { email: email },
+      select: {
+        email: true,
+        isVerified: true,
+      },
+    });
+
+    if (!verifiedEmail)
+      return res.status(412).send({
+        message: '요청된 이메일이 아닙니다.',
+      });
+    if (verifiedEmail.isVerified)
+      return res.status(412).send({ message: '이미 인증된 이메일 입니다.' });
+
+    await prisma.users.update({
+      where: { email: email },
+      data: { isVerified: true },
+    });
+
+    return res.status(201).send({ message: '이메일 인증이 완료되었습니다.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send({ message: '오류가 발생하였습니다.' });
+  }
+});
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
@@ -180,14 +313,14 @@ router.post('/sign-in', async (req, res, next) => {
     });
     if (!user)
       return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
-  } else{
+  } else {
     if (!email) {
       return res.status(400).json({ message: '이메일은 필수값입니다.' });
     }
     if (!password) {
       return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
     }
-  
+
     user = await prisma.users.findFirst({
       where: {
         email,
@@ -208,6 +341,7 @@ router.post('/sign-in', async (req, res, next) => {
   // 쿠키에 저장
   res.cookie('accessToken', accessToken);
   res.cookie('refreshToken', refreshToken);
+  res.cookie('isVerified', user.isVerified);
 
   return res.json({ accessToken, refreshToken });
 });
@@ -220,7 +354,7 @@ router.post('/sign-out', async (req, res, next) => {
 });
 
 // 내 정보 조회
-router.get('/profile', jwtValidate, async (req, res, next) => {
+router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
   const user = res.locals.user;
 
   let imageUrl = '';
@@ -249,6 +383,7 @@ router.get('/profile', jwtValidate, async (req, res, next) => {
 router.patch(
   '/profile',
   jwtValidate,
+  verifiedEmail,
   upload.single('profileImage'),
   async (req, res, next) => {
     const userId = res.locals.user.id;
@@ -337,7 +472,7 @@ router.patch(
 );
 
 /** 내가 팔로잉하는 유저 목록 조회 */
-router.get('/following', jwtValidate, async (req, res, next) => {
+router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
   try {
     const followedByUserId = res.locals.user.id; // me
     const followingUsers = await prisma.users.findMany({
@@ -361,7 +496,7 @@ router.get('/following', jwtValidate, async (req, res, next) => {
 });
 
 /** 내 팔로워 목록 조회*/
-router.get('/follower', jwtValidate, async (req, res, next) => {
+router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
   try {
     const followingUserId = res.locals.user.id; // me
     const followers = await prisma.users.findMany({

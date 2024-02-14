@@ -19,7 +19,11 @@ model Users {
   profileImage String?    @map("profileImage")
   createdAt    DateTime   @default(now()) @map("createdAt")
   updatedAt    DateTime   @updatedAt @map("updatedAt")
+<<<<<<< HEAD
   isVerified   Boolean    @default(false)
+=======
+  isVerified   Boolean    @default(false) @map("isVerified")
+>>>>>>> d01d1e303be157c815931573f461493b4ebd84dc
   comments     Comments[]
   followedBy   Follows[]  @relation("followedBy")
   following    Follows[]  @relation("following")
