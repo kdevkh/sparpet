@@ -18,16 +18,32 @@ router.post(
 
     const post = await prisma.posts.findFirst({ where: { id: +postId } });
     if (!post) {
-      return res.status(404).json({ message: '게시물 조회에 실패하였습니다.' });
+      return res.send(`<script>alert('게시물 조회에 실패하였습니다.');window.location.replace('/posts')</script>`)
+      // return res.status(404).json({ message: '게시물 조회에 실패하였습니다.' });
     }
 
     const duplication = await prisma.Likes.findFirst({
       where: { userId: user.id, postId: +postId },
     });
     if (duplication) {
-      return res
-        .status(409)
-        .json({ message: '이미 좋아요를 누른 게시물입니다.' });
+      // return res.send(`<script>alert('이미 좋아요를 누른 게시물입니다.');window.location.replace('/posts/${Number(postId)}')</script>`)
+      // return res
+      //   .status(409)
+      //   .json({ message: '이미 좋아요를 누른 게시물입니다.' });
+      await prisma.likes.delete({
+        where: duplication
+      });
+  
+      await prisma.posts.update({
+        where: post,
+        data: {
+          countlike: {
+            decrement: 1,
+          },
+        },
+      });
+      return res.status(201).redirect(`/posts/${Number(postId)}`);
+
     }
 
     const like = await prisma.likes.create({
@@ -45,10 +61,8 @@ router.post(
         },
       },
     });
-
-    return res.status(201).json({ message: '좋아요 성공' });
-  }
-);
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
+})
 
 // 게시물에 좋아요 취소
 router.delete(
@@ -102,6 +116,18 @@ router.get('/posts', jwtValidate, verifiedEmail, async (req, res, next) => {
     where: {
       id: { in: likes.map((like) => like.postId) },
     },
+    select: {
+      id: true,
+      title: true,
+      user: {
+        select: {
+          name: true,
+        },
+      },
+      countlike: true,
+      createdAt: true,
+      view : true
+    }
   });
 
   if (posts.length < 1) {
@@ -110,7 +136,7 @@ router.get('/posts', jwtValidate, verifiedEmail, async (req, res, next) => {
       .json({ message: '좋아요를 누른 게시물이 없습니다.' });
   }
 
-  return res.status(200).json({ posts });
+  return res.status(200).render('main.ejs',{ data:posts });
 });
 
 // 댓글 좋아요
@@ -138,9 +164,20 @@ router.post(
       where: { userId: user.id, postId: +postId, commentId: +commentId },
     });
     if (duplication) {
-      return res
-        .status(409)
-        .json({ message: '이미 좋아요를 누른 댓글입니다.' });
+      // return res
+      //   .status(409)
+      //   .json({ message: '이미 좋아요를 누른 댓글입니다.' });
+      await prisma.Likes.delete({ where: duplication });
+
+      await prisma.comments.update({
+        where: comment,
+        data: {
+          countlike: {
+            decrement: 1,
+          },
+        },
+      });
+      return res.status(201).redirect(`/posts/${Number(postId)}`);
     }
 
     const like = await prisma.likes.create({
@@ -160,7 +197,7 @@ router.post(
       },
     });
 
-    return res.status(201).json({ message: '좋아요 성공' });
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
   }
 );
 

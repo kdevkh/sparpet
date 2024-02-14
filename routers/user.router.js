@@ -272,7 +272,7 @@ router.post(
       ]);
 
       // '회원가입 완료' 메시지 즉시 반환
-      return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
+      return res.status(201).render('verified.ejs');
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: '오류가 발생하였습니다.' });
@@ -307,7 +307,7 @@ router.get('/verification', async (req, res, next) => {
       data: { isVerified: true },
     });
 
-    return res.status(201).send({ message: '이메일 인증이 완료되었습니다.' });
+    return res.status(201).render('sign-in.ejs');
   } catch (err) {
     console.error(err);
     return res.status(400).send({ message: '오류가 발생하였습니다.' });
@@ -326,13 +326,16 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user)
-      return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      // return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
+      return res.status(400).send(`<script>alert('존재하지 않는 이메일입니다.');window.location.replace('/sign-in')</script>`)
   } else {
     if (!email) {
-      return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
+      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
     if (!password) {
-      return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
+      return res.status(400).send(`<script>alert('비밀번호는 필수값입니다.');window.location.replace('/sign-in')</script>`)
     }
 
     user = await prisma.users.findFirst({
@@ -342,7 +345,8 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user) {
-      return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      // return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
+      return res.status(400).send(`<script>alert('잘못된 로그인 정보입니다.');window.location.replace('/sign-in')</script>`)
     }
   }
 
@@ -357,14 +361,15 @@ router.post('/sign-in', async (req, res, next) => {
   res.cookie('refreshToken', refreshToken);
   res.cookie('isVerified', user.isVerified);
 
-  return res.json({ accessToken, refreshToken });
+  return res.redirect('/posts');
 });
 
 // 로그아웃
 router.post('/sign-out', async (req, res, next) => {
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
-  return res.json({ message: '로그아웃 되었습니다.' });
+  // return res.json({ message: '로그아웃 되었습니다.' });
+  return res.redirect('/posts');
 });
 
 // 내 정보 조회
@@ -383,15 +388,16 @@ router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
     imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
   }
 
-  return res.json({
-    profileImage: user.profileImage,
-    email: user.email,
-    name: user.name,
-    phone: user.phone,
-    gender: user.gender,
-    birth: user.birth,
-    profileImageUrl: imageUrl,
-  });
+  // return res.json({
+  //   profileImage: user.profileImage,
+  //   email: user.email,
+  //   name: user.name,
+  //   phone: user.phone,
+  //   gender: user.gender,
+  //   birth: user.birth,
+  //   profileImageUrl: imageUrl,
+  // });
+  return res.render('user.ejs',{user : user});
 });
 
 // 내 정보 수정

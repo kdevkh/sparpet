@@ -1,0 +1,16 @@
+<body>
+    <%- include('header.ejs') %>
+
+    <h1 class="createpost">게시물 수정</h1>
+    <form class="form-box" action='/posts/<%= post.id %>?_method=PATCH' method="POST" enctype="multipart/form-data">
+        <div class="create_post">
+            <input type="file" name="attachFile" accept="image/*, video/*" multiple />
+            <div id="content" class="createpost_content">
+                <input class="createpost_title_input" type="text" name="title" value="<%= post.title %>">
+                <input class="createpost_content_input" type="text" name="content" value="<%= post.content %>">
+                <button class="createpost_btn" type="submit">게시물 수정</button>
+            </div>
+        </div>
+    </form>
+
+</body>

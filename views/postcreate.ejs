@@ -1,0 +1,16 @@
+<body>
+    <%- include('header.ejs') %>
+
+    <h1 class="createpost">새 게시물 작성</h1>
+    <form class="form-box" action='/posts' method="POST" enctype="multipart/form-data">
+        <div class="create_post">
+            <input type="file" name="attachFile" accept="image/*, video/*" multiple />
+            <div id="content" class="createpost_content">
+                <input class="createpost_title_input" type="text" name="title" placeholder="제목을 입력하세요">
+                <input class="createpost_content_input" type="text" name="content" placeholder="내용을 입력하세요">
+                <button class="createpost_btn" type="submit">게시물 생성</button>
+            </div>
+        </div>
+    </form>
+
+</body>
