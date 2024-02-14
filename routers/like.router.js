@@ -64,7 +64,6 @@ router.post(
     return res.status(201).redirect(`/posts/${Number(postId)}`);
 })
 
-
 // 게시물에 좋아요 취소
 router.delete(
   '/post/:postId',

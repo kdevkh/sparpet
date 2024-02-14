@@ -31,11 +31,8 @@ router.post(
         userId: user.id,
       },
     });
-
   return res.redirect('back');
 });
-
-
 
 // 댓글 조회
 router.get('/:postId/comments', async (req, res, next) => {
