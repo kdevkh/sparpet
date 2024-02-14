@@ -18,32 +18,20 @@ import { s3, randomName, bucketName } from '../utils/aws.js';
 import passport from 'passport';
 import { Strategy as naverStrategy } from 'passport-naver';
 import { Strategy as KakaoStrategy } from 'passport-kakao';
-import { Strategy as googleStrategy} from 'passport-google-oauth20';
+import { Strategy as googleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
 // passport-naver
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = process.env.CALLBACK_URL;
-
 passport.use(
   new naverStrategy(
     {
-      clientID,
-      clientSecret,
-      callbackURL,
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'naverProfile',
-        'access',
-        accessToken,
-        're',
-        refreshToken,
-        profile
-      );
       console.log(profile);
       try {
         const naverId = profile.id;
@@ -53,18 +41,26 @@ passport.use(
         const naverBirth = profile.birthday;
         const naverPhone = profile.phone;
 
-        const newUser = await prisma.users.create({
-          data: {
-            clientId: naverId,
+        const exUser = await prisma.users.findFirst({
+          where: {
             email: naverEmail,
-            name: naverDisplayName,
-            gender: naverGender,
-            birth: naverBirth,
-            phone: naverPhone,
           },
         });
-
-        done(null, newUser);
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: naverId,
+              email: naverEmail,
+              name: naverDisplayName,
+              gender: naverGender,
+              birth: naverBirth,
+              phone: naverPhone,
+            },
+          });
+          done(null, newUser);
+        }
       } catch (error) {
         console.error('Error creating user: ', error);
         done(error, null);
@@ -79,6 +75,89 @@ passport.use(
         console.log('Session Check' + req.session.sid);
         done(null, user);
       });
+    }
+  )
+);
+
+// passport-kakao
+passport.use(
+  new KakaoStrategy(
+    {
+      clientID: process.env.CLIENT_ID_KAKAO,
+      clientSecret: process.env.CLIENT_SECRET_KAKAO,
+      callbackURL: process.env.CALLBACK_URL_KAKAO,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      try {
+        const kakaoId = profile.id;
+        const kakaoEmail =
+          profile._json &&
+          profile._json.kakao_account &&
+          profile._json.kakao_account.email;
+        const kakaoDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: kakaoEmail,
+          },
+        });
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: kakaoId.toString(),
+              email: kakaoEmail,
+              name: kakaoDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
+    }
+  )
+);
+
+// passport-google
+passport.use(
+  new googleStrategy(
+    {
+      clientID: process.env.CLIENT_ID_GOOGLE,
+      clientSecret: process.env.CLIENT_SECRET_GOOGLE,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      console.log(profile);
+      try {
+        const googleId = profile.id;
+        const googleEmail = profile.emails[0].value;
+        const googleDisplayName = profile.displayName;
+
+        const exUser = await prisma.users.findFirst({
+          where: {
+            email: googleEmail,
+          },
+        });
+        if (exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: googleId,
+              email: googleEmail,
+              name: googleDisplayName,
+            },
+          });
+          done(null, newUser);
+        }
+      } catch (error) {
+        console.error('Error creating user: ', error);
+        done(error, null);
+      }
     }
   )
 );
