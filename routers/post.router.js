@@ -186,6 +186,7 @@ router.post(
       });
     }
 
+
     // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
     const attachFilesString = req.files.map((file) => file.key).join(',');
 
