@@ -187,14 +187,14 @@ router.post(
     }
 
     // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
-    // const attachFilesString = req.files.map((file) => file.key).join(',');
+    const attachFilesString = req.files.map((file) => file.key).join(',');
 
     const data = await prisma.posts.create({
       data: {
         title,
         content,
         userId: user.id,
-        // attachFile: attachFilesString,
+        attachFile: attachFilesString,
       },
     });
     return res.status(201).redirect('/posts');

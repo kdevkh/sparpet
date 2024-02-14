@@ -224,13 +224,14 @@ router.post(
     }
 
     // profileImage가 req에 존재하면,
-    const imageName = randomName();
-    if (req.file) {
+    let imageName = '';
+    if (req.file != undefined) {
       // s3에 저장
       // 그 전에 320x320px로 리사이징
       const imageBuffer = await sharp(req.file.buffer)
         .resize({ height: 320, width: 320, fit: 'contain' })
         .toBuffer();
+      imageName = randomName();
       const params = {
         Bucket: bucketName,
         Key: imageName,
@@ -249,7 +250,7 @@ router.post(
         phone,
         gender,
         birth,
-        profileImage: imageName,
+        profileImage: imageName === '' ? null : imageName,
         isVerified: false,
       },
     });
@@ -366,6 +367,7 @@ router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
   let imageUrl = '';
   if (user.profileImage) {
     // s3에서 image 이름으로 사용자가 해당 이미지에 액세스할 수 있는 한시적인 url 생성
+
     const getObjectParams = {
       Bucket: bucketName,
       Key: user.profileImage,
