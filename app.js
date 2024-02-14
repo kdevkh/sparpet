@@ -46,11 +46,6 @@ app.get('/auth/naver/callback',
     	res.redirect('/'); 
     });
 
-app.get('/logout', function(req, res){
-	req.logout();
-	res.redirect('/');
-});
-
 // passport-kakao
 app.get('/auth/kakao', passport.authenticate('kakao', { state: 'myStateValue' }));
 app.get(
@@ -62,6 +57,12 @@ app.get(
     res.redirect('/');
   }
 );
+
+app.get('/logout', function(req, res){
+	req.logout();
+  req.session.destroy();
+	res.redirect('/');
+});
 
 app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);

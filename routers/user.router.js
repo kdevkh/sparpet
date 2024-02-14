@@ -52,18 +52,26 @@ passport.use(
         // const provider = 'naver',
         // const naver = profile._json
 
-        const newUser = await prisma.users.create({
-          data: {
-            clientId: naverId,
+        const exUser = await prisma.users.findFirst({
+          where: {
             email: naverEmail,
-            name: naverDisplayName,
-            gender: naverGender,
-            birth: naverBirth,
-            phone: naverPhone,
-          },
-        });
-
-        done(null, newUser);
+          }
+        })
+        if(exUser) {
+          done(null, exUser);
+        } else {
+          const newUser = await prisma.users.create({
+            data: {
+              clientId: naverId,
+              email: naverEmail,
+              name: naverDisplayName,
+              gender: naverGender,
+              birth: naverBirth,
+              phone: naverPhone,
+            },
+          });
+          done(null, newUser);
+        }
       } catch (error) {
         console.error('Error creating user: ', error);
         done(error, null);
