@@ -7,7 +7,6 @@ import { s3, randomName, bucketName } from '../utils/aws.js';
 import { GetObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
-import axios from 'axios';
 
 //===========================================================
 const upload = multer({
@@ -179,18 +178,15 @@ router.get('/:postId', async (req, res, next) => {
   }
   post.attachFile = attachFileUrlList;
 
-  // const comments = await prisma.comments.findMany({
-  //   where: { postId: Number(postId) },
-  //   orderBy: { createdAt: 'desc' },
-  // });
-
-  const commentRes = await axios.get(
-    `http://localhost:3000/posts/${postId}/comments`
-  );
-  return res.render('detail.ejs', {
-    post: post,
-    comment: commentRes.data.comment,
+  const comments = await prisma.comments.findMany({
+    where: { postId: Number(postId) },
+    orderBy: { createdAt: 'desc' },
   });
+
+  // const commentRes = await axios.get(
+  //   `http://localhost:3000/posts/${postId}/comments`
+  // );
+  return res.render('detail.ejs', {post: post, comment: comments });
 });
 
 // 게시글 생성
