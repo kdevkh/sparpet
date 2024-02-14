@@ -24,10 +24,6 @@ app.use('/posts', postRouter, commentRouter);
 app.use('/like', likeRouter);
 app.use(errorHandlingMiddleware);
 
-app.listen(PORT, () => {
-  console.log(`sparpet app listening on port ${PORT}`);
-});
-
 app.get('/post/create', async (req,res,next) => {
   res.render('postcreate.ejs');
 })
@@ -41,7 +37,7 @@ app.get('/sign-up', async (req,res,next) => {
 })
 
 // passport-naver
-app.use(session({ secret: 'secret_key'}));
+app.use(session({ secret: 'secret_key', resave: true, saveUninitialized: true,}));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
