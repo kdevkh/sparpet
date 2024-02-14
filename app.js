@@ -23,14 +23,15 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static('public'));
 
-// app.get('/', function(req, res){
-// 	res.render('index', { user: req.user });
-// });
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
 
-
-// app.get('/login', function(req, res){
-// 	res.render('login', { user: req.user });
-// });
+passport.deserializeUser(function (req, user, done) {
+  req.session.sid = user.name;
+  console.log('Session Check' + req.session.sid);
+  done(null, user);
+});
 
 // Setting the naver oauth routes
 app.get('/auth/naver', 

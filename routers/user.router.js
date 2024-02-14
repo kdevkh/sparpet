@@ -22,16 +22,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // passport-naver
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = process.env.CALLBACK_URL;
-
 passport.use(
   new naverStrategy(
     {
-      clientID,
-      clientSecret,
-      callbackURL,
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: process.env.CALLBACK_URL,
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
@@ -84,26 +80,12 @@ passport.use(
 );
 
 // passport-kakao
-const clientKakaoID = process.env.CLIENT_ID_KAKAO;
-const clientKakaoSecret = process.env.CLIENT_SECRET_KAKAO;
-const callbackKakaoURL = process.env.CALLBACK_URL_KAKAO;
-
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function (req, user, done) {
-  req.session.sid = user.name;
-  console.log('Session Check' + req.session.sid);
-  done(null, user);
-});
-
 passport.use(
   new KakaoStrategy(
     {
-      clientID: clientKakaoID,
-      clientSecret: clientKakaoSecret,
-      callbackURL: callbackKakaoURL,
+      clientID: process.env.CLIENT_ID_KAKAO,
+      clientSecret: process.env.CLIENT_SECRET_KAKAO,
+      callbackURL: process.env.CALLBACK_URL_KAKAO,
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
