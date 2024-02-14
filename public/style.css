@@ -3,9 +3,25 @@ button {
 }
 
 .header {
-  width: auto;
-  height: 80px;
-  margin-top: 30px;
+    width: auto;
+    height: 80px;
+    position: relative;
+    margin-top: 30px;
+}
+
+.logo {
+    font-size: 60px;
+    margin-left: 50px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.search {
+    position: absolute;
+    top: 15px;
+    left: 35%;
 }
 
 /** 추가 **/
@@ -86,15 +102,29 @@ a {
     position: absolute;
     right: 7.5%;
     top: 25px;
+
+    display: block;
 }
 
 .sign_out {
     position: absolute;
-    right: 14.4%;
+    right: 6%;
     top: 25px;
 
     font-size: 15px;
     width: 100px;
+
+    display: none;
+}
+
+.user {
+    position: absolute;
+    right: 9%;
+    top: 28px;
+
+    font-size: 25px;
+    width: 100px;
+    padding: 5px;
 
     display: none;
 }
@@ -213,38 +243,46 @@ a {
     position: relative;
 }
 
-.detail_preview {
-  grid-area: preview;
-  width: 100%;
-  margin-bottom: 10px;
-  border: 1px solid black;
-
-}
-
 .detail_title {
-  font: bold;
-  font-size: 40px;
-  display: flext;
-  justify-content: flex-end;
+    font-size: 50px;
+    text-align: center;
+
+    margin-bottom: 50px;
 }
 
-.detail_small {
-  display: flex;
-  justify-content: space-between;
+.detail_username {
+    font-size: 18px;
+    text-align: end;
+
+    margin-bottom: 50px;
+}
+
+.detail_content {
+    font-size: 25px;
+    text-align: center;
 }
 
 .detail_createdAt {
-  margin-right: 10px;
-}
-
-.detail_small2 {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
+    position: absolute;
+    bottom: 30px;
 }
 
 .detail_countlike {
-  margin-right: 10px;
+    position: absolute;
+    bottom: 30px;
+    right : 30px;
+
+    font-size: 18px;
+    border: transparent;
+    background-color: transparent;
+}
+
+.detail_view {
+    font-size: 18px;
+
+    position: absolute;
+    bottom: 30px;
+    right : 100px;
 }
 
 .detail_file {
@@ -292,36 +330,44 @@ video {
   height: auto;
 }
 
-.detail_content {
-  grid-area: content;
-  border: 1px solid black;
-}
+.commentcontainer {
+    border: 1px solid black;
+    width: 90%;
 
-.detail_comments {
-  grid-area: comment;
-  border: 1px solid black;
+    padding: 25px;
+    margin-top: 50px;
+    margin-bottom: 300px;
+    margin-left: 5%;
 }
 
 .comments {
     border: 1px solid black;
     height: 80px;
     padding: 10px;
+
     display: block;
 }
 
 .commentitem {
     display: flex;
-  display: flex;
-  margin-bottom: 5px;
-  border: 1px solid black;
 }
 
 .comment {
-  flex: 6;
+    margin : 18px 0 15px 15px;
+    font-size: 18px;
 }
 
-.form-box {
-  margin-left: 10px;
+.comment_countlike,
+.comment_edit,
+.comment_delete {
+    border: transparent;
+    background-color: transparent;
+    padding: 5px;
+
+    font-size: 15px;
+
+    margin-top: 60px;
+    margin-left: auto;
 }
 
 .comment_edit {
@@ -480,3 +526,23 @@ video {
   justify-content: center;
 }
 
+.social a {
+    margin-left: 50px;
+}
+
+.social {
+    margin-top: 150px;
+    margin-left: 35px;
+}
+
+.profile {
+    width: 95%;
+    height: 700px;
+
+    margin-left: 2%;
+    margin-top: 50px;
+
+    border: 1px solid black;
+
+    
+}

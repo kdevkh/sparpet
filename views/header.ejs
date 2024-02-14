@@ -13,7 +13,7 @@
         <a href="/posts" class="logo">Sparpet</a>
 
         <div class="search">
-            <button class="search_button"><i class="fa-solid fa-magnifying-glass"></i></button>
+            <button class="search_button"><i class="fa-solid fa-magnifying-glass" oninput="searchPosts()"></i></button>
             <input class="search_input" type="text" placeholder="게시글 검색하기">
         </div>
 
@@ -21,6 +21,7 @@
         <form class="sign-out" action='/users/sign-out'method="POST">
             <button type="submit" class="sign_out">로그아웃</button>
         </form>
+        <a class="user" href="/users/profile"><i class="fa-solid fa-user"></i></a>
         <a href="/sign-up" class="sign_up">회원가입</a>
     </div>
 
@@ -33,9 +34,13 @@
             // 쿠키가 존재하면 로그아웃 버튼을 표시하고, 로그인 버튼을 감춤
             if (accessToken || refreshToken) {
                 document.querySelector('.sign_in').style.display = 'none';
+                document.querySelector('.sign_up').style.display = 'none';
+                document.querySelector('.user').style.display = 'block';
                 document.querySelector('.sign_out').style.display = 'block';
             } else {
                 document.querySelector('.sign_in').style.display = 'block';
+                document.querySelector('.sign_up').style.display = 'block';
+                document.querySelector('.user').style.display = 'none';
                 document.querySelector('.sign_out').style.display = 'none';
             }
         });

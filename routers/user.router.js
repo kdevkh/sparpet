@@ -264,7 +264,7 @@ router.post(
       <a href="${url}">이메일 인증해버리기</a>`,
     });
 
-    return res.status(201).render('/verified.ejs');
+    return res.status(201).render('verified.ejs');
   }
 );
 
@@ -376,15 +376,16 @@ router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
     imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
   }
 
-  return res.json({
-    profileImage: user.profileImage,
-    email: user.email,
-    name: user.name,
-    phone: user.phone,
-    gender: user.gender,
-    birth: user.birth,
-    profileImageUrl: imageUrl,
-  });
+  // return res.json({
+  //   profileImage: user.profileImage,
+  //   email: user.email,
+  //   name: user.name,
+  //   phone: user.phone,
+  //   gender: user.gender,
+  //   birth: user.birth,
+  //   profileImageUrl: imageUrl,
+  // });
+  return res.render('user.ejs',{user : user});
 });
 
 // 내 정보 수정

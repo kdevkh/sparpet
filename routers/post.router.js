@@ -305,7 +305,7 @@ router.patch(
       },
     });
 
-    return res.status(201).json({ data });
+    return res.status(201).redirect('/posts');
     //return res.status(201).end();
   }
 );
