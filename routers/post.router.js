@@ -51,7 +51,9 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       userId: { in: followingUsersIdList },
     },
   });
-  return res.status(200).json({ posts });
+
+  //return res.status(200).json({ posts });
+  res.render('followingposts.ejs', { posts: posts });
 });
 
 // 게시글 목록 조회
@@ -59,7 +61,7 @@ router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
   const orderValue = req.query.orderValue ?? 'desc';
 
-  if (!['id'].includes(orderKey)) {
+  if (!orderKey) {
     return res.status(400).json({
       success: false,
       message: 'orderKey가 올바르지 않습니다.',
@@ -84,16 +86,42 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
+      attachFile: true,
       view: true,
     },
     orderBy: [
       {
-        [orderKey]: orderValue.toLowerCase(),
+        [orderKey]: orderValue,
       },
     ],
   });
 
-  return res.json({ data: posts });
+  for (let i = 0; i < posts.length; i++) {
+    if (posts[i].attachFile !== null && posts[i].attachFile !== '') {
+      const tmp = posts[i].attachFile
+        .split(',')
+        .filter((file) =>
+          ['jpg', 'jpeg', 'png', 'gif'].includes(file.split('.')[1])
+        );
+      if (tmp.length === 0) {
+        posts[i].attachFile =
+          'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
+      } else {
+        const command = new GetObjectCommand({
+          Bucket: bucketName,
+          Key: tmp[0],
+        });
+
+        const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
+
+        posts[i].attachFile = signedUrl;
+      }
+    } else {
+      posts[i].attachFile =
+        'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
+    }
+  }
+  return res.render('main.ejs', { data: posts });
 });
 
 // 게시글 상세 조회
@@ -132,6 +160,7 @@ router.get('/:postId', async (req, res, next) => {
           id: true,
         },
       },
+      countlike: true,
       createdAt: true,
       view: true,
     },
@@ -155,7 +184,15 @@ router.get('/:postId', async (req, res, next) => {
   }
   post.attachFile = attachFileUrlList;
 
-  return res.json({ data: post });
+  const comments = await prisma.comments.findMany({
+    where: { postId: Number(postId) },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  // const commentRes = await axios.get(
+  //   `http://localhost:3000/posts/${postId}/comments`
+  // );
+  return res.render('detail.ejs', { post: post, comment: comments });
 });
 
 // 게시글 생성
@@ -190,7 +227,7 @@ router.post(
         attachFile: attachFilesString,
       },
     });
-    return res.status(201).json({ data });
+    return res.status(201).redirect('/posts');
   }
 );
 
@@ -241,11 +278,16 @@ router.patch(
     }
 
     // 사용자가 attachFile을 수정하려고 하면,
-    /** 근데 이렇게 하면 기존 거는 다 지워지고 새 걸로 전부 교체됨... 기존 걸 유지하면서 새 것도 업데이트하려면 db에 컬럼을 여러개 놔야하나? attachFile1, attachFile2..이런식으로? */
-    if (req.files) {
+    let attachFilesString =
+      post.attachFile == ''
+        ? 'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png'
+        : post.attachFile == null
+        ? 'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png'
+        : post.attachFile;
+
+    if (req.files.length !== 0) {
       // s3에 저장된 기존 것 삭제
       const existFileNameList = post.attachFile.split(',');
-
       for (let i = 0; i < existFileNameList.length; i++) {
         const command = new DeleteObjectCommand({
           Bucket: bucketName,
@@ -257,11 +299,10 @@ router.patch(
           next(err);
         }
       }
+      // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
+      attachFilesString = req.files.map((file) => file.key).join(',');
     }
-
-    // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
-    const attachFilesString = req.files.map((file) => file.key).join(',');
-
+    console.log('3 ', attachFilesString);
     const data = await prisma.posts.update({
       where: {
         id: Number(postId),
@@ -272,8 +313,8 @@ router.patch(
         attachFile: attachFilesString,
       },
     });
-
-    return res.status(201).json({ data });
+    console.log('4 ', data);
+    return res.status(201).redirect('/posts');
     //return res.status(201).end();
   }
 );
@@ -332,7 +373,8 @@ router.delete(
       where: { id: Number(postId) },
     });
 
-    return res.status(201).end();
+    // return res.status(201).end();
+    return res.status(201).redirect('/posts');
   }
 );
 
@@ -353,10 +395,16 @@ router.post(
 
       const followedByUserId = res.locals.user.id; // A = me
       // 자기자신 팔로우 불가
-      if (followingUserId == followedByUserId)
+      if (followingUserId == followedByUserId) {
         return res
           .status(400)
-          .json({ message: '자기자신을 팔로우할 수 없습니다.' });
+          .send(
+            `<script>alert('자기자신을 팔로우할 수 없습니다.');history.back();</script>`
+          );
+        // return res
+        // .status(400)
+        // .json({ message: '자기자신을 팔로우할 수 없습니다.' });
+      }
 
       // 이미 팔로우한 user인지 확인 -> 언팔로우
       const isExistfollowingUser = await prisma.follows.findMany({
@@ -372,7 +420,10 @@ router.post(
             followingId: +followingUserId,
           },
         });
-        return res.status(201).json({ message: '언팔로우 성공' });
+        return res
+          .status(400)
+          .send(`<script>alert('언팔로우 성공!');history.back();</script>`);
+        //return res.status(201).json({ message: '언팔로우 성공' });
       }
 
       // A가 B를 팔로우
@@ -382,11 +433,14 @@ router.post(
           followedById: +followedByUserId,
         },
       });
-      return res.status(201).json({ message: '팔로우 성공', followUsers });
+
+      return res
+        .status(400)
+        .send(`<script>alert('팔로우 성공!');history.back();</script>`);
+      //return res.status(201).json({ message: '팔로우 성공', followUsers });
     } catch (err) {
       next(err);
     }
   }
 );
-
 export default router;

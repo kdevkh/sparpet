@@ -1,0 +1,60 @@
+<body>
+  <%- include('header.ejs') %>
+  <div class="profile-container">
+    <div class="my-profile-container">
+      <div class="profile-img-btns">
+        <div class="profile-img">
+          <img src="<%= user.profileImage %>" />
+        </div>
+        <div class="profile-btns">
+          <button class="follower-btn">
+            <a href="/users/follower">내 팔로워</a>
+            <!--좀있다 마저함-->
+          </button>
+          <button class="following-btn">
+            <a href="/users/following">팔로우 보기</a>
+          </button>
+          <button class="following-posts-btn">
+            <a href="/posts/following">팔로우 게시물 보기</a>
+          </button>
+        </div>
+      </div>
+      <div class="profile-content">
+        <div class="profile-name"><%= user.name %></div>
+        <div class="profile-gender"><%= user.gender %></div>
+        <div class="profile-birth"><%= user.birth %></div>
+        <div class="profile-phone"><%= user.phone %></div>
+        <div class="profile-email"><%= user.email %></div>
+      </div>
+      <div class="profile-edit">
+        <button class="profile-edit-btn">
+          <a href="/profile/edit">수정</a>
+        </button>
+      </div>
+    </div>
+    <div class="my-posts-container">
+      <% posts.forEach((post) => { %>
+      <div class="my-post">
+        <div class="post-date"><%= post.createdAt %></div>
+        <div class="post-title"><%= post.title %></div>
+        <button class="post_edit-btn">
+          <a href="/post/<%= post.id %>/edit">수정</a>
+        </button>
+        <!-- <button class="post-edit-btn">
+          <a href="/post/<%= post.id %>/edit">수정</a>
+        </button> -->
+        <div class="post-delete">
+          <form
+            class="form-box"
+            action="/posts/<%=post.id %>?_method=DELETE"
+            method="post"
+          >
+            <button class="post-delete-btn">삭제</button>
+          </form>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+  <script></script>
+</body>
