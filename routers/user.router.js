@@ -4,6 +4,7 @@ import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
 import nodemailer from 'nodemailer';
+import verifiedEmail from '../middleware/verifiedEmail.middleware.js';
 
 import multer from 'multer';
 import {
@@ -19,68 +20,6 @@ import { Strategy as naverStrategy } from 'passport-naver';
 import dotenv from 'dotenv';
 
 dotenv.config();
-
-// passport-naver
-// const clientID = process.env.CLIENT_ID;
-// const clientSecret = process.env.CLIENT_SECRET;
-// const callbackURL = process.env.CALLBACK_URL;
-
-// passport.use(
-//   new naverStrategy(
-//     {
-//       clientID,
-//       clientSecret,
-//       callbackURL,
-//     },
-//     async (accessToken, refreshToken, profile, done) => {
-//       console.log(
-//         'naverProfile',
-//         'access',
-//         accessToken,
-//         're',
-//         refreshToken,
-//         profile
-//       );
-//       console.log(profile);
-//       try {
-//         const naverId = profile.id;
-//         const naverEmail = profile.emails && profile.emails[0].value;
-//         const naverDisplayName = profile.displayName;
-//         const naverGender = profile.gender;
-//         const naverBirth = profile.birthday;
-//         const naverPhone = profile.phone;
-//         // const provider = 'naver',
-//         // const naver = profile._json
-
-//         const newUser = await prisma.users.create({
-//           data: {
-//             clientId: naverId,
-//             email: naverEmail,
-//             name: naverDisplayName,
-//             gender: naverGender,
-//             birth: naverBirth,
-//             phone: naverPhone,
-//           },
-//         });
-
-//         done(null, newUser);
-//       } catch (error) {
-//         console.error('Error creating user: ', error);
-//         done(error, null);
-//       }
-
-//       passport.serializeUser(function (user, done) {
-//         done(null, user);
-//       });
-
-//       passport.deserializeUser(function (req, user, done) {
-//         req.session.sid = user.name;
-//         console.log('Session Check' + req.session.sid);
-//         done(null, user);
-//       });
-//     }
-//   )
-// );
 
 // multer
 const storage = multer.memoryStorage();
@@ -261,6 +200,7 @@ router.post('/sign-in', async (req, res, next) => {
   // 쿠키에 저장
   res.cookie('accessToken', accessToken);
   res.cookie('refreshToken', refreshToken);
+  res.cookie('isVerified', user.isVerified);
 
   return res.json({ accessToken, refreshToken });
 });
@@ -273,7 +213,7 @@ router.post('/sign-out', async (req, res, next) => {
 });
 
 // 내 정보 조회
-router.get('/profile', jwtValidate, async (req, res, next) => {
+router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
   const user = res.locals.user;
 
   let imageUrl = '';
@@ -302,6 +242,7 @@ router.get('/profile', jwtValidate, async (req, res, next) => {
 router.patch(
   '/profile',
   jwtValidate,
+  verifiedEmail,
   upload.single('profileImage'),
   async (req, res, next) => {
     const userId = res.locals.user.id;
@@ -390,7 +331,7 @@ router.patch(
 );
 
 /** 내가 팔로잉하는 유저 목록 조회 */
-router.get('/following', jwtValidate, async (req, res, next) => {
+router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
   try {
     const followedByUserId = res.locals.user.id; // me
     const followingUsers = await prisma.users.findMany({
@@ -414,7 +355,7 @@ router.get('/following', jwtValidate, async (req, res, next) => {
 });
 
 /** 내 팔로워 목록 조회*/
-router.get('/follower', jwtValidate, async (req, res, next) => {
+router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
   try {
     const followingUserId = res.locals.user.id; // me
     const followers = await prisma.users.findMany({
