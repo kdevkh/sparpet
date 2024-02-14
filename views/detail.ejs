@@ -34,7 +34,7 @@
                         <%= comment.content %>
                     </div>
                     <form class="form-box" action='/like/post/<%= post.id %>/comment/<%= comment.id %>' method="POST">
-                        <button class="comment_countlike"><i class="fa-solid fa-heart"></i>
+                        <button class="comment_countlike" type="submit"><i class="fa-solid fa-heart"></i>
                             <%= comment.countlike %>
                         </button>
                     </form>
@@ -48,9 +48,9 @@
                 <div class="space"></div>
                 <% }) %>
                 <div class="newcomment">
-                    <input class="comment_input" type="text" placeholder="댓글을 입력하세요">
-                    <form class="form-box" action='/posts/<%= post.id %>/comments' method="POST">
-                        <button class="newcomment_btn">등록</button>
+                    <form class="form-box" action='/posts/<%= post.id %>/comments' method="POST"></form>
+                        <input class="comment_input" type="text" name="content" placeholder="댓글을 입력하세요">
+                        <button class="newcomment_btn" type="submit" >등록</button>
                     </form>
                 </div>
         </div>

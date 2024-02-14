@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   '/post/:postId',
   jwtValidate,
-  verifiedEmail,
+  // verifiedEmail,
   async (req, res, next) => {
     const postId = req.params.postId;
     const user = res.locals.user;
@@ -25,9 +25,11 @@ router.post(
       where: { userId: user.id, postId: +postId },
     });
     if (duplication) {
-      return res
-        .status(409)
-        .json({ message: '이미 좋아요를 누른 게시물입니다.' });
+      return res.send(`<script>alert('이미 좋아요를 누른 게시물입니다.');window.location.replace('/posts/${Number(postId)}')</script>`)
+      // return res
+      //   .status(409)
+      //   .json({ message: '이미 좋아요를 누른 게시물입니다.' });
+
     }
 
     const like = await prisma.likes.create({
@@ -45,7 +47,7 @@ router.post(
         },
       },
     });
-    return res.status(201).render({message : "좋아요 성공"});
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
 })
 
 

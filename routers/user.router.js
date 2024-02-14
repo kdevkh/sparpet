@@ -108,7 +108,7 @@ router.post(
         gender,
         birth,
         profileImage: imageName,
-        isVerified: false,
+        // isVerified: false,
       },
     });
 
@@ -121,7 +121,7 @@ router.post(
       <a href="${url}">이메일 인증해버리기</a>`,
     });
 
-    return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
+    return res.status(201).render('/verified.ejs');
   }
 );
 
@@ -152,7 +152,7 @@ router.get('/verification', async (req, res, next) => {
       data: { isVerified: true },
     });
 
-    return res.status(201).send({ message: '이메일 인증이 완료되었습니다.' });
+    return res.status(201).render('sign-in.ejs');
   } catch (err) {
     console.error(err);
     return res.status(400).send({ message: '오류가 발생하였습니다.' });
@@ -202,7 +202,7 @@ router.post('/sign-in', async (req, res, next) => {
   res.cookie('refreshToken', refreshToken);
   res.cookie('isVerified', user.isVerified);
 
-  return res.json({ accessToken, refreshToken });
+  return res.redirect('/posts');
 });
 
 // 로그아웃

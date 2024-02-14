@@ -10,11 +10,12 @@ const router = express.Router();
 router.post(
   '/:postId/comments',
   jwtValidate,
-  verifiedEmail,
+  // verifiedEmail,
   async (req, res, next) => {
     const user = res.locals.user;
     const postId = req.params.postId;
     const { content } = req.body;
+    console.log("성공");
 
     if (!content) {
       return res.status(400).json({
@@ -31,7 +32,7 @@ router.post(
       },
     });
 
-    return res.status(201).json({});
+    return res.status(201).redirect(`/posts/${Number(postId)}`);
   }
 );
 

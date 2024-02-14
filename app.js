@@ -14,7 +14,9 @@ import passport from 'passport';
 const app = express();
 const PORT = 3000;
 
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(express.static('public'));
 app.use('/refresh', refreshRouter);
@@ -35,3 +37,6 @@ app.get('/sign-in', async (req,res,next) => {
   res.render('sign-in.ejs');
 })
 
+app.get('/sign-up', async (req,res,next) => {
+  res.render('sign-up.ejs');
+})
