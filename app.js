@@ -76,7 +76,6 @@ app.use('/refresh', refreshRouter);
 app.use('/users', userRouter);
 app.use('/posts', postRouter, commentRouter);
 app.use('/like', likeRouter);
-app.use(errorHandlingMiddleware);
 
 app.listen(PORT, () => {
   console.log(`sparpet app listening on port ${PORT}`);
