@@ -1613,6 +1613,13 @@ file-type@^3.3.0:
   resolved "https://registry.npmjs.org/file-type/-/file-type-3.9.0.tgz"
   integrity sha512-RLoqTXE8/vPmMuTI88DAzhMYC99I8BWv7zYP4A1puo5HIjEJ5EX48ighy4ZyKMG9EDXxBgW6e++cn7d1xuFghA==
 
+filelist@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/filelist/-/filelist-1.0.4.tgz"
+  integrity sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==
+  dependencies:
+    minimatch "^5.0.1"
+
 fill-range@^7.0.1:
   version "7.0.1"
   resolved "https://registry.npmjs.org/fill-range/-/fill-range-7.0.1.tgz"

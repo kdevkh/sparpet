@@ -19,17 +19,16 @@ app.use(cookieParser());
 app.use(express.static('public'));
 
 // passport-naver
-app.use(session({ secret: 'secret_key'}));
+app.use(session({ secret: 'secret_key', resave:false, saveUninitialized:true}));
 app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/', function(req, res){
-	res.render('index', { user: req.user });
+	res.render('postcreate.ejs', { user: req.user });
 });
 
-
 app.get('/login', function(req, res){
-	res.render('login', { user: req.user });
+	res.render('sign-in.ejs', { user: req.user });
 });
 
 // Setting the naver oauth routes

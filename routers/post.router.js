@@ -156,7 +156,12 @@ router.get('/:postId', async (req, res, next) => {
   }
   post.attachFile = attachFileUrlList;
 
-  return res.render('detail.ejs',{ data: post });
+  const comments = await prisma.comments.findMany({
+    where: { postId: Number(postId) },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return res.render('detail.ejs',{ post: post, comment: comments });
 });
 
 // 게시글 생성
