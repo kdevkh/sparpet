@@ -170,10 +170,10 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: process.env.EMAILSERVICE,
   auth: {
-    user: 'nodejs.testermail@gmail.com',
-    pass: 'lbyz etni yrts fndy',
+    user: process.env.USERMAIL,
+    pass: process.env.PASSWORD,
   },
 });
 
