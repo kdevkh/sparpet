@@ -24,6 +24,70 @@ a {
   left: 35%;
 }
 
+/** 추가 **/
+
+body {
+  height: 100vh;
+  width: 100vh;
+  display: inline;
+}
+.detail_post {
+  margin: 0 auto;
+  display: grid;
+  width: 70%;
+  padding: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-rows: 1fr 2fr 8fr 2fr;
+  grid-template-areas:
+    'preview'
+    'content'
+    'file'
+    'comment';
+  border: 1px solid black;
+}
+
+a {
+  text-decoration: none;
+}
+
+.search {
+  position: absolute;
+  top: 15px;
+  left: 35%;
+}
+
+/** 추가 **/
+
+body {
+  height: 100vh;
+  width: 100vh;
+  display: inline;
+}
+.detail_post {
+  margin: 0 auto;
+  display: grid;
+  width: 70%;
+  padding: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-rows: 1fr 2fr 8fr 2fr;
+  grid-template-areas:
+    'preview'
+    'content'
+    'file'
+    'comment';
+  border: 1px solid black;
+}
+
+a {
+  text-decoration: none;
+}
+
+.search {
+  position: absolute;
+  top: 15px;
+  left: 35%;
+}
+
 .search_input {
   width: 500px;
   height: 45px;
@@ -72,15 +136,29 @@ a {
   position: absolute;
   right: 7.5%;
   top: 25px;
+
+  display: block;
 }
 
 .sign_out {
   position: absolute;
-  right: 14.4%;
+  right: 6%;
   top: 25px;
 
   font-size: 15px;
   width: 100px;
+
+  display: none;
+}
+
+.user {
+  position: absolute;
+  right: 9%;
+  top: 28px;
+
+  font-size: 25px;
+  width: 100px;
+  padding: 5px;
 
   display: none;
 }
@@ -240,6 +318,15 @@ a {
   right: 100px;
 }
 
+.detail_file {
+  grid-area: file;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid black;
+}
+
 .editpost {
   display: flex;
 }
@@ -258,6 +345,22 @@ a {
   padding: 8px;
   margin-left: 15px;
   margin-top: 15px;
+}
+
+.commentcontainer {
+  border: 1px solid black;
+  width: 90%;
+}
+
+.detail_file > img,
+video {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.detail_file > video {
+  width: 70%;
+  height: auto;
 }
 
 .commentcontainer {
@@ -612,4 +715,35 @@ a {
   font-size: 16px;
   margin-bottom: 10px;
   height: 15px;
+}
+
+.comment-btn {
+  flex: 4;
+  display: flex;
+  margin: 3px;
+  justify-content: flex-end;
+}
+
+.newcomment {
+  display: flex;
+  justify-content: center;
+}
+
+.social a {
+  margin-left: 50px;
+}
+
+.social {
+  margin-top: 150px;
+  margin-left: 35px;
+}
+
+.profile {
+  width: 95%;
+  height: 700px;
+
+  margin-left: 2%;
+  margin-top: 50px;
+
+  border: 1px solid black;
 }

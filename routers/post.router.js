@@ -90,6 +90,7 @@ router.get('/', async (req, res, next) => {
       },
       countlike: true,
       createdAt: true,
+      attachFile: true,
       view: true,
     },
     orderBy: [
@@ -98,6 +99,27 @@ router.get('/', async (req, res, next) => {
       },
     ],
   });
+
+  for (let i = 0; i < posts.length; i++) {
+    if (posts[i].attachFile) {
+      const tmp = posts[i].attachFile
+        .split(',')
+        .filter((file) =>
+          ['jpg', 'jpeg', 'png', 'gif'].includes(file.split('.')[1])
+        );
+
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: tmp[0],
+      });
+      const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
+
+      posts[i].attachFile = signedUrl;
+    } else {
+      posts[i].attachFile =
+        'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
+    }
+  }
 
   return res.render('main.ejs', { data: posts });
 });
@@ -167,6 +189,9 @@ router.get('/:postId', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
+  // const commentRes = await axios.get(
+  //   `http://localhost:3000/posts/${postId}/comments`
+  // );
   return res.render('detail.ejs', { post: post, comment: comments });
 });
 
@@ -192,14 +217,14 @@ router.post(
     }
 
     // s3에 저장된 파일명을 ,로 이은 문자열 형태로 DB에 저장
-    // const attachFilesString = req.files.map((file) => file.key).join(',');
+    const attachFilesString = req.files.map((file) => file.key).join(',');
 
     const data = await prisma.posts.create({
       data: {
         title,
         content,
         userId: user.id,
-        // attachFile: attachFilesString,
+        attachFile: attachFilesString,
       },
     });
     return res.status(201).redirect('/posts');
@@ -283,7 +308,7 @@ router.patch(
       },
     });
 
-    return res.status(201).json({ data });
+    return res.status(201).redirect('/posts');
     //return res.status(201).end();
   }
 );

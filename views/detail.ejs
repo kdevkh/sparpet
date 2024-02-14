@@ -1,10 +1,19 @@
 <body>
-
     <%- include('header.ejs') %>
+        <div class="detail_file">
+          <% post.attachFile.forEach((url) => { %> <% const ext =
+          url.split('.').pop().split('?')[0]; %> <% if(['jpg', 'jpeg', 'png',
+          'gif'].includes(ext)) { %>
+          <img src="<%= url %>" />
+          <% } else if(['mp4', 'webm', 'ogg'].includes(ext)) { %>
+          <video controls>
+            <source src="<%= url %>" type="video/<%= ext %>" />
+            호환되는 브라우저가 아닙니다(chrome 권장).
+          </video>
+          <% } %> <% }); %>
+        </div>
         <div class="detail_post">
-            <div class="detail_photo">
-                <img src=" https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png">
-            </div>
+
             <div class="detail_contents">
                 <div class="detail_title">
                     <%= post.title %>
@@ -38,6 +47,7 @@
                 <button class="post_delete">삭제</button>
             </form>
         </div>
+
 
         <div class="commentcontainer">
             <% comment.forEach((comment, index)=> { %>
@@ -80,4 +90,80 @@
             }           
         </script>
 </body>
+
+  <!-- <%- include('header.ejs') %>
+  <div class="detail_post">
+    <div class="detail_preview">
+      <div class="detail_title"><%= post.title %></div>
+      <div class="detail_small">
+        <div class="detail_username">작성자 : <%= post.user.name %></div>
+        <div class="detail_createdAt"><%= post.createdAt %></div>
+      </div>
+      <div class="detail_small2">
+        <div class="detail_view">조회수 : <%= post.view %></div>
+        <div class="detail_countlike">
+          <i class="fa-solid fa-heart"></i>
+          <%= post.countlike %>
+        </div>
+      </div>
+    </div>
+    <div class="detail_content"><%= post.content %></div>
+    <div class="detail_file">
+      <% post.attachFile.forEach((url) => { %> <% const ext =
+      url.split('.').pop().split('?')[0]; %> <% if(['jpg', 'jpeg', 'png',
+      'gif'].includes(ext)) { %>
+      <img src="<%= url %>" />
+      <% } else if(['mp4', 'webm', 'ogg'].includes(ext)) { %>
+      <video controls>
+        <source src="<%= url %>" type="video/<%= ext %>" />
+        호환되는 브라우저가 아닙니다(chrome 권장).
+      </video>
+      <% } %> <% }); %>
+    </div>
+    <div class="detail_comments">
+      <% comment.forEach(comment=> { %>
+      <div class="comments">
+        <div class="comment"><%= comment.content %></div>
+        <div class="comment-btn">
+          <form
+            class="form-box"
+            action="/like/post/<%= post.id %>/comment/<%= comment.id %>"
+            method="POST"
+          >
+            <button class="comment_countlike">
+              <i class="fa-solid fa-heart"></i>
+              <%= comment.countlike %>
+            </button>
+          </form>
+          <form
+            class="form-box"
+            id="updateCommentForm"
+            action="/posts/<%= post.id %>/comments/<%= comment.id %>"
+            method="PATCH"
+          >
+            <button type="submit" class="comment_edit">수정</button>
+          </form>
+          <form
+            class="form-box"
+            action="/posts/<%= post.id %>/comments/<%= comment.id %>"
+            method="DELETE"
+          >
+            <button class="comment_delete">삭제</button>
+          </form>
+        </div>
+      </div>
+      <% }) %>
+      <div class="newcomment">
+        <form
+          class="form-box"
+          action="/posts/<%= post.id %>/comments"
+          method="POST"
+        >
+          <input class="comment_input" type="text" name="content" required />
+          <button class="newcomment_btn">등록</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body> -->
 
