@@ -37,9 +37,10 @@
         // 페이지 로딩 시에 쿠키 확인
         const accessToken = getCookie('accessToken');
         const refreshToken = getCookie('refreshToken');
+        const connectSid = getCookie('connect.sid');
 
         // 쿠키가 존재하면 로그아웃 버튼을 표시하고, 로그인 버튼을 감춤
-        if (accessToken || refreshToken) {
+        if (accessToken || refreshToken || connectSid) {
           document.querySelector('.sign_in').style.display = 'none';
           document.querySelector('.sign_up').style.display = 'none';
           document.querySelector('.user').style.display = 'block';

@@ -114,7 +114,7 @@ app.get(
     failureRedirect: '#!/auth/login',
   }),
   (req, res) => {
-    res.redirect('/');
+    res.redirect('/posts');
   }
 );
 
@@ -129,7 +129,7 @@ app.get(
     failureRedirect: '/',
   }),
   (req, res) => {
-    res.redirect('/');
+    res.redirect('/posts');
   }
 );
 
@@ -142,7 +142,7 @@ app.get(
   '/auth/google/callback',
   passport.authenticate('google', { failureRedirect: '/' }),
   (req, res) => {
-    res.redirect('/');
+    res.redirect('/posts');
   }
 );
 app.get('/logout', function (req, res) {
