@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 import sha256 from 'crypto-js/sha256.js';
 import jwt from 'jsonwebtoken';
 import jwtValidate from '../middleware/jwtValidate.middleware.js';
+import nodemailer from 'nodemailer';
 
 import multer from 'multer';
 import {
@@ -20,66 +21,66 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // passport-naver
-const clientID = process.env.CLIENT_ID;
-const clientSecret = process.env.CLIENT_SECRET;
-const callbackURL = process.env.CALLBACK_URL;
+// const clientID = process.env.CLIENT_ID;
+// const clientSecret = process.env.CLIENT_SECRET;
+// const callbackURL = process.env.CALLBACK_URL;
 
-passport.use(
-  new naverStrategy(
-    {
-      clientID,
-      clientSecret,
-      callbackURL,
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      console.log(
-        'naverProfile',
-        'access',
-        accessToken,
-        're',
-        refreshToken,
-        profile
-      );
-      console.log(profile);
-      try {
-        const naverId = profile.id;
-        const naverEmail = profile.emails && profile.emails[0].value;
-        const naverDisplayName = profile.displayName;
-        const naverGender = profile.gender;
-        const naverBirth = profile.birthday;
-        const naverPhone = profile.phone;
-        // const provider = 'naver',
-        // const naver = profile._json
+// passport.use(
+//   new naverStrategy(
+//     {
+//       clientID,
+//       clientSecret,
+//       callbackURL,
+//     },
+//     async (accessToken, refreshToken, profile, done) => {
+//       console.log(
+//         'naverProfile',
+//         'access',
+//         accessToken,
+//         're',
+//         refreshToken,
+//         profile
+//       );
+//       console.log(profile);
+//       try {
+//         const naverId = profile.id;
+//         const naverEmail = profile.emails && profile.emails[0].value;
+//         const naverDisplayName = profile.displayName;
+//         const naverGender = profile.gender;
+//         const naverBirth = profile.birthday;
+//         const naverPhone = profile.phone;
+//         // const provider = 'naver',
+//         // const naver = profile._json
 
-        const newUser = await prisma.users.create({
-          data: {
-            clientId: naverId,
-            email: naverEmail,
-            name: naverDisplayName,
-            gender: naverGender,
-            birth: naverBirth,
-            phone: naverPhone,
-          },
-        });
+//         const newUser = await prisma.users.create({
+//           data: {
+//             clientId: naverId,
+//             email: naverEmail,
+//             name: naverDisplayName,
+//             gender: naverGender,
+//             birth: naverBirth,
+//             phone: naverPhone,
+//           },
+//         });
 
-        done(null, newUser);
-      } catch (error) {
-        console.error('Error creating user: ', error);
-        done(error, null);
-      }
+//         done(null, newUser);
+//       } catch (error) {
+//         console.error('Error creating user: ', error);
+//         done(error, null);
+//       }
 
-      passport.serializeUser(function (user, done) {
-        done(null, user);
-      });
+//       passport.serializeUser(function (user, done) {
+//         done(null, user);
+//       });
 
-      passport.deserializeUser(function (req, user, done) {
-        req.session.sid = user.name;
-        console.log('Session Check' + req.session.sid);
-        done(null, user);
-      });
-    }
-  )
-);
+//       passport.deserializeUser(function (req, user, done) {
+//         req.session.sid = user.name;
+//         console.log('Session Check' + req.session.sid);
+//         done(null, user);
+//       });
+//     }
+//   )
+// );
 
 // multer
 const storage = multer.memoryStorage();
@@ -87,6 +88,14 @@ const upload = multer({ storage: storage });
 
 const prisma = new PrismaClient();
 const router = express.Router();
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'nodejs.testermail@gmail.com',
+    pass: 'lbyz etni yrts fndy',
+  },
+});
 
 // 회원가입
 router.post(
@@ -160,12 +169,56 @@ router.post(
         gender,
         birth,
         profileImage: imageName,
+        isVerified: false,
       },
+    });
+
+    const url = `http://localhost:3000/users/verification?email=${email}`;
+    await transporter.sendMail({
+      from: 'nodejs.testermail@gmail.com',
+      to: email,
+      subject: '[스파르펫] 회원가입 인증코드',
+      html: `<h3>스파르펫 회원가입 인증코드</h3> <p>아래의 "이메일 인증" 링크를 클릭해주세요</p>
+      <a href="${url}">이메일 인증해버리기</a>`,
     });
 
     return res.status(201).json({ message: '회원가입이 완료되었습니다.' });
   }
 );
+
+// 회원가입 email 인증
+router.get('/verification', async (req, res, next) => {
+  try {
+    const { email } = req.query;
+    if (!email)
+      return res.status(412).send({ message: '비정상적인 접근입니다.' });
+
+    const verifiedEmail = await prisma.users.findFirst({
+      where: { email: email },
+      select: {
+        email: true,
+        isVerified: true,
+      },
+    });
+
+    if (!verifiedEmail)
+      return res.status(412).send({
+        message: '요청된 이메일이 아닙니다.',
+      });
+    if (verifiedEmail.isVerified)
+      return res.status(412).send({ message: '이미 인증된 이메일 입니다.' });
+
+    await prisma.users.update({
+      where: { email: email },
+      data: { isVerified: true },
+    });
+
+    return res.status(201).send({ message: '이메일 인증이 완료되었습니다.' });
+  } catch (err) {
+    console.error(err);
+    return res.status(400).send({ message: '오류가 발생하였습니다.' });
+  }
+});
 
 // 로그인
 router.post('/sign-in', async (req, res, next) => {
@@ -180,14 +233,14 @@ router.post('/sign-in', async (req, res, next) => {
     });
     if (!user)
       return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
-  } else{
+  } else {
     if (!email) {
       return res.status(400).json({ message: '이메일은 필수값입니다.' });
     }
     if (!password) {
       return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
     }
-  
+
     user = await prisma.users.findFirst({
       where: {
         email,
