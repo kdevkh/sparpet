@@ -29,15 +29,15 @@
       <a class="user" href="/users/profile"><i class="fa-solid fa-user"></i></a>
       <a href="/sign-up" class="sign_up">회원가입</a>
     </div>
-    <div id="cookie" style="display: none;"><%= cookie %></div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // 페이지 로딩 시에 쿠키 확인
-            const cookie = document.getElementById('cookie');
+            const accessToken = getCookie('accessToken');
+            const refreshToken = getCookie('refreshToken');
     
             // 쿠키가 존재하면 로그아웃 버튼을 표시하고, 로그인 버튼을 감춤
-            if (cookie) {
+            if (accessToken || refreshToken ) {
                 document.querySelector('.sign_in').style.display = 'none';
                 document.querySelector('.sign_up').style.display = 'none';
                 document.querySelector('.user').style.display = 'block';
@@ -50,18 +50,17 @@
             }
         });
 
-      // // 쿠키를 읽어오는 함수
-      // function getCookie(name) {
-      //   const cookies = document.cookie.split(';');
-      //   for (let i = 0; i < cookies.length; i++) {
-      //     const cookie = cookies[i].trim();
-      //     if (cookie.startsWith(name + '=')) {
-      //       return cookie.substring(name.length + 1);
-      //     }
-      //   }
-      //   return '';
-      // }
-
+      // 쿠키를 읽어오는 함수
+      function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.startsWith(name + '=')) {
+            return cookie.substring(name.length + 1);
+          }
+        }
+        return '';
+      }
     </script>
   </body>
 </html>

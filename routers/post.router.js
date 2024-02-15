@@ -61,7 +61,6 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
 router.get('/', async (req, res, next) => {
   const orderKey = req.query.orderKey ?? 'id';
   const orderValue = req.query.orderValue ?? 'desc';
-  const cookie = req.cookies;
 
   if (!orderKey) {
     return res.status(400).json({
@@ -123,7 +122,7 @@ router.get('/', async (req, res, next) => {
         'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
     }
   }
-  return res.render('main.ejs', { data: posts, cookie:cookie });
+  return res.render('main.ejs', { data: posts });
 });
 
 // 게시글 상세 조회

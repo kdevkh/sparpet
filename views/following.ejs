@@ -1,17 +1,7 @@
 <body>
-    <!-- <%- include('header.ejs') %>
-
-    <h1 class="createpost">팔로잉 유저 조회</h1>
-    <% user.forEach(user => { %>
-        <div class="profile">
-            <div class="profileImage">아이디 : <%= user.id %></div>
-            <div class="email">이메일 : <%= user.email %></div>
-        </div>
-    <% }) %>
-
-</body> -->
-
   <%- include('header.ejs') %>
+
+  <h1 class="createpost">팔로잉 조회</h1>
   <div class="my-following-container">
     <% users.forEach((user) => { %>
     <div class="my-following">
