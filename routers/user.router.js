@@ -56,6 +56,7 @@ passport.use(
               gender: naverGender,
               birth: naverBirth,
               phone: naverPhone,
+              isVerified: true,
             },
           });
           done(null, newUser);
@@ -109,6 +110,7 @@ passport.use(
               clientId: kakaoId.toString(),
               email: kakaoEmail,
               name: kakaoDisplayName,
+              isVerified: true,
             },
           });
           done(null, newUser);
@@ -127,7 +129,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID_GOOGLE,
       clientSecret: process.env.CLIENT_SECRET_GOOGLE,
-      callbackURL: process.env.CALLBACK_URL_GOOGLE,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE2,
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
@@ -149,6 +151,7 @@ passport.use(
               clientId: googleId,
               email: googleEmail,
               name: googleDisplayName,
+              isVerified: true,
             },
           });
           done(null, newUser);
@@ -185,41 +188,73 @@ router.post(
         req.body;
       if (!email) {
         // return res.status(400).json({ message: '이메일은 필수값입니다.' });
-        return res.status(404).send("<script>alert('이메일은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('이메일은 필수값입니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (!password) {
         // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
-        return res.status(404).send("<script>alert('비밀번호는 필수값입니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('비밀번호는 필수값입니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (!passwordConfirm) {
         // return res
         //   .status(400)
         //   .json({ message: '비밀번호 확인은 필수값입니다.' });
-        return res.status(404).send("<script>alert('비밀번호 확인은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('비밀번호 확인은 필수값입니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (password.email < 6) {
         // return res
         //   .status(400)
         //   .json({ message: '비밀번호는 최소 6자 이상입니다.' });
-        return res.status(404).send("<script>alert('비밀번호는 최소 6자 이상입니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('비밀번호는 최소 6자 이상입니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (password !== passwordConfirm) {
         // return res
         //   .status(400)
         //   .json({ message: '비밀번호가 일치하지 않습니다.' });
-        return res.status(404).send("<script>alert('비밀번호가 일치하지 않습니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('비밀번호가 일치하지 않습니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (!name) {
         // return res.status(400).json({ message: '이름은 필수값입니다.' });
-        return res.status(404).send("<script>alert('이름은 필수값입니다.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('이름은 필수값입니다.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (!gender) {
         // return res.status(400).json({ message: '성별을 입력해주세요.' });
-        return res.status(404).send("<script>alert('성별을 입력해주세요.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('성별을 입력해주세요.');window.location.replace('/users/sign-up')</script>"
+          );
       }
       if (!birth) {
         // return res.status(400).json({ message: '생년월일을 입력해주세요.' });
-        return res.status(404).send("<script>alert('생년월일을 입력해주세요.');window.location.replace('/users/sign-up')</script>")
+        return res
+          .status(404)
+          .send(
+            "<script>alert('생년월일을 입력해주세요.');window.location.replace('/users/sign-up')</script>"
+          );
       }
 
       const user = await prisma.users.findFirst({
@@ -495,29 +530,39 @@ router.patch(
   }
 );
 
-/** 내가 팔로잉하는 유저 목록 조회 */
+/** 내가 팔로잉한 유저들의 게시물 목록 조회 */
 router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
-  try {
-    const followedByUserId = res.locals.user.id; // me
-    const followingUsers = await prisma.users.findMany({
-      where: {
-        following: {
-          some: {
-            followedById: +followedByUserId,
-          },
+  const followedByUserId = res.locals.user.id; // me
+  let followingUsersIdList = await prisma.users.findMany({
+    where: {
+      following: {
+        some: {
+          followedById: +followedByUserId,
         },
       },
-      select: {
-        id: true,
-        email: true,
-      },
-    });
-    // return res.status(200).render('following.ejs',{user : followingUsers})
+    },
+    select: {
+      id: true,
+    },
+  });
 
-    res.render('following.ejs', { users: followingUsers });
-  } catch (err) {
-    next(err);
-  }
+  if (followingUsersIdList.length == 0)
+    // return res.status(404).json({ message: '게시물이 없습니다.' });
+    return res
+      .status(404)
+      .send(
+        "<script>alert('게시물이 없습니다.');window.location.replace('/posts')</script>"
+      );
+  followingUsersIdList = followingUsersIdList.map((v) => v.id);
+
+  const posts = await prisma.posts.findMany({
+    where: {
+      userId: { in: followingUsersIdList },
+    },
+  });
+  // return res.status(200).render('main.ejs',{ data:posts });
+
+  return res.status(200).render('followingposts.ejs', { posts: posts });
 });
 
 /** 내 팔로워 목록 조회*/
@@ -542,7 +587,6 @@ router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
     // return res.status(200).render('follower.ejs',{user : followers})
 
     return res.render('follower.ejs', { followers: followers });
-
   } catch (err) {
     next(err);
   }
