@@ -56,6 +56,7 @@ passport.use(
               gender: naverGender,
               birth: naverBirth,
               phone: naverPhone,
+              isVerified: true,
             },
           });
           done(null, newUser);
@@ -109,6 +110,7 @@ passport.use(
               clientId: kakaoId.toString(),
               email: kakaoEmail,
               name: kakaoDisplayName,
+              isVerified: true,
             },
           });
           done(null, newUser);
@@ -149,6 +151,7 @@ passport.use(
               clientId: googleId,
               email: googleEmail,
               name: googleDisplayName,
+              isVerified: true,
             },
           });
           done(null, newUser);
