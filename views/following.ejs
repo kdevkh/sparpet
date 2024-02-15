@@ -1,5 +1,5 @@
 <body>
-    <%- include('header.ejs') %>
+    <!-- <%- include('header.ejs') %>
 
     <h1 class="createpost">팔로잉 유저 조회</h1>
     <% user.forEach(user => { %>
@@ -9,4 +9,16 @@
         </div>
     <% }) %>
 
+</body> -->
+
+  <%- include('header.ejs') %>
+  <div class="my-following-container">
+    <% users.forEach((user) => { %>
+    <div class="my-following">
+      <div class="id">유저아이디: <%= user.id %></div>
+      <div class="email">이메일: <%= user.email %></div>
+    </div>
+    <% }); %>
+  </div>
 </body>
+

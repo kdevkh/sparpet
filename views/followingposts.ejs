@@ -1,0 +1,14 @@
+<body>
+  <%- include('header.ejs') %>
+  <div class="following-posts-container">
+    <% posts.forEach((post) => { %>
+    <div class="following-post">
+      <a href="/posts/<%= post.id %>">
+        <div class="title"><%= post.title %></div>
+        <div class="createdAt"><%= post.createdAt %></div>
+        <div class="view">조회수: <%= post.view %></div></a
+      >
+    </div>
+    <% }); %>
+  </div>
+</body>

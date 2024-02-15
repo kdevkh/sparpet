@@ -12,7 +12,6 @@ import {
   GetObjectCommand,
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3';
-import sharp from 'sharp';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { s3, randomName, bucketName } from '../utils/aws.js';
 import passport from 'passport';
@@ -176,7 +175,6 @@ const transporter = nodemailer.createTransport({
     pass: process.env.PASSWORD,
   },
 });
-
 // 회원가입
 router.post(
   '/sign-up',
@@ -236,17 +234,14 @@ router.post(
       }
 
       // profileImage가 req에 존재하면,
-      const imageName = randomName();
+      let imageName = null;
       if (req.file) {
         // s3에 저장
-        // 그 전에 320x320px로 리사이징
-        const imageBuffer = await sharp(req.file.buffer)
-          .resize({ height: 320, width: 320, fit: 'contain' })
-          .toBuffer();
+        imageName = randomName();
         const params = {
           Bucket: bucketName,
           Key: imageName,
-          Body: imageBuffer,
+          Body: req.file.buffer,
           ContentType: req.file.mimetype,
         };
         const command = new PutObjectCommand(params);
@@ -287,7 +282,6 @@ router.post(
     }
   }
 );
-
 // 회원가입 email 인증
 router.get('/verification', async (req, res, next) => {
   try {
@@ -335,15 +329,27 @@ router.post('/sign-in', async (req, res, next) => {
     });
     if (!user)
       // return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
-      return res.status(400).send(`<script>alert('존재하지 않는 이메일입니다.');window.location.replace('/sign-in')</script>`)
+      return res
+        .status(400)
+        .send(
+          `<script>alert('존재하지 않는 이메일입니다.');window.location.replace('/sign-in')</script>`
+        );
   } else {
     if (!email) {
       // return res.status(400).json({ message: '이메일은 필수값입니다.' });
-      return res.status(400).send(`<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-in')</script>`)
+      return res
+        .status(400)
+        .send(
+          `<script>alert('이메일은 필수값입니다.');window.location.replace('/sign-in')</script>`
+        );
     }
     if (!password) {
       // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
-      return res.status(400).send(`<script>alert('비밀번호는 필수값입니다.');window.location.replace('/sign-in')</script>`)
+      return res
+        .status(400)
+        .send(
+          `<script>alert('비밀번호는 필수값입니다.');window.location.replace('/sign-in')</script>`
+        );
     }
 
     user = await prisma.users.findFirst({
@@ -354,7 +360,11 @@ router.post('/sign-in', async (req, res, next) => {
     });
     if (!user) {
       // return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
-      return res.status(400).send(`<script>alert('잘못된 로그인 정보입니다.');window.location.replace('/sign-in')</script>`)
+      return res
+        .status(400)
+        .send(
+          `<script>alert('잘못된 로그인 정보입니다.');window.location.replace('/sign-in')</script>`
+        );
     }
   }
 
@@ -384,10 +394,10 @@ router.post('/sign-out', async (req, res, next) => {
 router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
   const user = res.locals.user;
 
-  let imageUrl = '';
+  let imageUrl =
+    'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
   if (user.profileImage) {
     // s3에서 image 이름으로 사용자가 해당 이미지에 액세스할 수 있는 한시적인 url 생성
-
     const getObjectParams = {
       Bucket: bucketName,
       Key: user.profileImage,
@@ -395,17 +405,13 @@ router.get('/profile', jwtValidate, verifiedEmail, async (req, res, next) => {
     const command = new GetObjectCommand(getObjectParams);
     imageUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
   }
+  user.profileImage = imageUrl;
 
-  // return res.json({
-  //   profileImage: user.profileImage,
-  //   email: user.email,
-  //   name: user.name,
-  //   phone: user.phone,
-  //   gender: user.gender,
-  //   birth: user.birth,
-  //   profileImageUrl: imageUrl,
-  // });
-  return res.render('user.ejs',{user : user});
+  const posts = await prisma.posts.findMany({
+    where: { userId: +res.locals.user.id },
+  });
+
+  res.render('profile.ejs', { user: user, posts: posts });
 });
 
 // 내 정보 수정
@@ -416,18 +422,10 @@ router.patch(
   upload.single('profileImage'),
   async (req, res, next) => {
     const userId = res.locals.user.id;
-    const {
-      profileImage,
-      name,
-      phone,
-      gender,
-      birth,
-      newPassword,
-      newPasswordConfirm,
-    } = req.body;
+    const { name, phone, gender, birth, newPassword, newPasswordConfirm } =
+      req.body;
 
     if (
-      !profileImage &&
       !name &&
       !phone &&
       !gender &&
@@ -466,15 +464,11 @@ router.patch(
         await s3.send(command);
       }
       // s3에 저장
-      // 그 전에 320x320px로 리사이징
-      const imageBuffer = await sharp(req.file.buffer)
-        .resize({ height: 320, width: 320, fit: 'contain' })
-        .toBuffer();
       imageName = randomName();
       params = {
         Bucket: bucketName,
         Key: imageName,
-        Body: imageBuffer,
+        Body: req.file.buffer,
         ContentType: req.file.mimetype,
       };
       command = new PutObjectCommand(params);
@@ -515,11 +509,12 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       },
       select: {
         id: true,
-        clientId: true,
         email: true,
       },
     });
-    return res.status(200).render('following.ejs',{user : followingUsers})
+    // return res.status(200).render('following.ejs',{user : followingUsers})
+
+    res.render('following.ejs', { users: followingUsers });
   } catch (err) {
     next(err);
   }
@@ -544,7 +539,10 @@ router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
       },
     });
 
-    return res.status(200).render('follower.ejs',{user : followers})
+    // return res.status(200).render('follower.ejs',{user : followers})
+
+    return res.render('follower.ejs', { followers: followers });
+
   } catch (err) {
     next(err);
   }
