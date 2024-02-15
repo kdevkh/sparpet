@@ -43,7 +43,8 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
   });
 
   if (followingUsersIdList.length == 0)
-    return res.status(404).json({ message: '게시물이 없습니다.' });
+    // return res.status(404).json({ message: '게시물이 없습니다.' });
+    return res.status(404).send("<script>alert('게시물이 없습니다.');window.location.replace('/posts')</script>")
   followingUsersIdList = followingUsersIdList.map((v) => v.id);
 
   const posts = await prisma.posts.findMany({
@@ -51,9 +52,9 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       userId: { in: followingUsersIdList },
     },
   });
+  return res.status(200).render('main.ejs',{ data:posts });
 
-  //return res.status(200).json({ posts });
-  res.render('followingposts.ejs', { posts: posts });
+  // res.render('followingposts.ejs', { posts: posts });
 });
 
 // 게시글 목록 조회
@@ -189,10 +190,7 @@ router.get('/:postId', async (req, res, next) => {
     orderBy: { createdAt: 'desc' },
   });
 
-  // const commentRes = await axios.get(
-  //   `http://localhost:3000/posts/${postId}/comments`
-  // );
-  return res.render('detail.ejs', { post: post, comment: comments });
+  return res.render('detail.ejs', {post: post, comment: comments});
 });
 
 // 게시글 생성
@@ -313,9 +311,8 @@ router.patch(
         attachFile: attachFilesString,
       },
     });
-    console.log('4 ', data);
-    return res.status(201).redirect('/posts');
-    //return res.status(201).end();
+
+    return res.status(201).redirect(`/posts/${postId}`);
   }
 );
 
@@ -385,8 +382,9 @@ router.post(
   verifiedEmail,
   async (req, res, next) => {
     try {
+      const postId = req.params.postId;
       const followingUser = await prisma.posts.findFirst({
-        where: { id: +req.params.postId },
+        where: { id: Number(postId) },
         select: { userId: true },
       }); // B
       const followingUserId = followingUser.userId;
@@ -423,7 +421,6 @@ router.post(
         return res
           .status(400)
           .send(`<script>alert('언팔로우 성공!');history.back();</script>`);
-        //return res.status(201).json({ message: '언팔로우 성공' });
       }
 
       // A가 B를 팔로우
@@ -433,11 +430,9 @@ router.post(
           followedById: +followedByUserId,
         },
       });
-
       return res
         .status(400)
         .send(`<script>alert('팔로우 성공!');history.back();</script>`);
-      //return res.status(201).json({ message: '팔로우 성공', followUsers });
     } catch (err) {
       next(err);
     }

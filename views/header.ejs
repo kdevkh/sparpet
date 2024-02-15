@@ -31,25 +31,24 @@
     </div>
 
     <script>
-      document.addEventListener('DOMContentLoaded', function () {
-        // 페이지 로딩 시에 쿠키 확인
-        const accessToken = getCookie('accessToken');
-        const refreshToken = getCookie('refreshToken');
-        const connectSid = getCookie('connect.sid');
-
-        // 쿠키가 존재하면 로그아웃 버튼을 표시하고, 로그인 버튼을 감춤
-        if (accessToken || refreshToken || connectSid) {
-          document.querySelector('.sign_in').style.display = 'none';
-          document.querySelector('.sign_up').style.display = 'none';
-          document.querySelector('.user').style.display = 'block';
-          document.querySelector('.sign_out').style.display = 'block';
-        } else {
-          document.querySelector('.sign_in').style.display = 'block';
-          document.querySelector('.sign_up').style.display = 'block';
-          document.querySelector('.user').style.display = 'none';
-          document.querySelector('.sign_out').style.display = 'none';
-        }
-      });
+        document.addEventListener('DOMContentLoaded', function () {
+            // 페이지 로딩 시에 쿠키 확인
+            const accessToken = getCookie('accessToken');
+            const refreshToken = getCookie('refreshToken');
+    
+            // 쿠키가 존재하면 로그아웃 버튼을 표시하고, 로그인 버튼을 감춤
+            if (accessToken || refreshToken ) {
+                document.querySelector('.sign_in').style.display = 'none';
+                document.querySelector('.sign_up').style.display = 'none';
+                document.querySelector('.user').style.display = 'block';
+                document.querySelector('.sign_out').style.display = 'block';
+            } else {
+                document.querySelector('.sign_in').style.display = 'block';
+                document.querySelector('.sign_up').style.display = 'block';
+                document.querySelector('.user').style.display = 'none';
+                document.querySelector('.sign_out').style.display = 'none';
+            }
+        });
 
       // 쿠키를 읽어오는 함수
       function getCookie(name) {

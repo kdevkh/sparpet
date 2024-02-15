@@ -35,8 +35,8 @@
     <div class="my-posts-container">
       <% posts.forEach((post) => { %>
       <div class="my-post">
+        <h2><%= post.title %></h2>
         <div class="post-date"><%= post.createdAt %></div>
-        <div class="post-title"><%= post.title %></div>
         <button class="post_edit-btn">
           <a href="/post/<%= post.id %>/edit">수정</a>
         </button>
