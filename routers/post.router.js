@@ -52,9 +52,8 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
       userId: { in: followingUsersIdList },
     },
   });
-  return res.status(200).render('main.ejs',{ data:posts });
 
-  // res.render('followingposts.ejs', { posts: posts });
+  res.render('followingposts.ejs', { posts: posts });
 });
 
 // 게시글 목록 조회
