@@ -14,7 +14,7 @@
   - 전수민 : 팔로우/언팔로우, 팔로워 조회, 팔로잉 조회, 팔로잉 게시물 조회, 프로필 사진 업로드/조회/수정, 멀티미디어 파일 업로드/조회/수정, 프론트엔드
 
 ### ⚙️ 개발 환경
-- Node.js, Express, AWS RDS, S3, Github, zep
+- Node.js, Express, AWS RDS, S3, Github, Oauth, zep
 
 ### 📌 주요 기능
 
@@ -25,4 +25,27 @@
 - 좋아요 : 게시물 좋아요/좋아요 취소, 좋아요한 게시물 목록 조회, 댓글 좋아요/좋아요 취소
 - 팔로우 : 팔로우/언팔로우, 팔로워 조회, 팔로잉 조회
 
+### 🔒 환경변수
+ - DATABASE_URL
+ - CLIENT_ID
+ - CLIENT_SECRET
+ - CALLBACK_URL
+ - CLIENT_ID_KAKAO
+ - CLIENT_SECRET_KAKAO
+ - CALLBACK_URL_KAKAO
+ - CLIENT_ID_GOOGLE
+ - CLIENT_SECRET_GOOGLE
+ - CALLBACK_URL_GOOGLE
+ - EMAILSERVICE
+ - USERMAIL
+ - PASSWORD
+ - AWS_ACCESS_KEY
+ - AWS_SECRET_ACCESS_KEY
+ - BUCKET_NAME
+ - BUCKET_REGION
 
+ ### ✒ API 명세서 URL
+ - https://teamsparta.notion.site/b08cfc29a21941b7a8e2398277e89e68?v=4b5da409068347a8a81c141e15c3499b
+
+ ### 🔧 ERD URL
+ - 
