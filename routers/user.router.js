@@ -56,7 +56,6 @@ passport.use(
               gender: naverGender,
               birth: naverBirth,
               phone: naverPhone,
-              isVerified: true,
             },
           });
           done(null, newUser);
@@ -110,7 +109,6 @@ passport.use(
               clientId: kakaoId.toString(),
               email: kakaoEmail,
               name: kakaoDisplayName,
-              isVerified: true,
             },
           });
           done(null, newUser);
@@ -129,7 +127,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID_GOOGLE,
       clientSecret: process.env.CLIENT_SECRET_GOOGLE,
-      callbackURL: process.env.CALLBACK_URL_GOOGLE2,
+      callbackURL: process.env.CALLBACK_URL_GOOGLE,
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
@@ -151,7 +149,6 @@ passport.use(
               clientId: googleId,
               email: googleEmail,
               name: googleDisplayName,
-              isVerified: true,
             },
           });
           done(null, newUser);
@@ -530,39 +527,29 @@ router.patch(
   }
 );
 
-/** 내가 팔로잉한 유저들의 게시물 목록 조회 */
+/** 내가 팔로잉하는 유저 목록 조회 */
 router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
-  const followedByUserId = res.locals.user.id; // me
-  let followingUsersIdList = await prisma.users.findMany({
-    where: {
-      following: {
-        some: {
-          followedById: +followedByUserId,
+  try {
+    const followedByUserId = res.locals.user.id; // me
+    const followingUsers = await prisma.users.findMany({
+      where: {
+        following: {
+          some: {
+            followedById: +followedByUserId,
+          },
         },
       },
-    },
-    select: {
-      id: true,
-    },
-  });
+      select: {
+        id: true,
+        email: true,
+      },
+    });
+    // return res.status(200).render('following.ejs',{user : followingUsers})
 
-  if (followingUsersIdList.length == 0)
-    // return res.status(404).json({ message: '게시물이 없습니다.' });
-    return res
-      .status(404)
-      .send(
-        "<script>alert('게시물이 없습니다.');window.location.replace('/posts')</script>"
-      );
-  followingUsersIdList = followingUsersIdList.map((v) => v.id);
-
-  const posts = await prisma.posts.findMany({
-    where: {
-      userId: { in: followingUsersIdList },
-    },
-  });
-  // return res.status(200).render('main.ejs',{ data:posts });
-
-  return res.status(200).render('followingposts.ejs', { posts: posts });
+    res.render('following.ejs', { users: followingUsers });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /** 내 팔로워 목록 조회*/
