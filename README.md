@@ -48,5 +48,5 @@
  - https://teamsparta.notion.site/b08cfc29a21941b7a8e2398277e89e68?v=4b5da409068347a8a81c141e15c3499b
 
  ### 🔧 ERD URL
-<img width="1036" alt="스크린샷 2024-02-15 오전 10 35 23" src="https://github.com/kdevkh/sparpet/assets/154482647/f8e3867c-f5fc-47ad-b4f2-9e08d9bd0efc">
+<img width="1036" alt="스크린샷 2024-02-15 오전 10 38 00" src="https://github.com/kdevkh/sparpet/assets/154482647/64904e83-baed-4a34-8e2b-7ed96d84ef92">
 
