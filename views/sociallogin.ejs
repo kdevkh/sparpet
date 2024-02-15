@@ -1,8 +1,11 @@
 <body>
     <div class="social">
-        <a id="kakao" href="/auth/kakao" class="btn"><img src="https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Ff5d7b9d3-6faa-4fbd-92fb-abc13883f4ac%2Fkakao.png&blockId=845a0760-d543-46ae-965d-018c4289eb32&width=80"></a>
-        <a id="naver" href="/auth/naver" class="btn"><img src="https://logo-resources.thevc.kr/organizations/80x80/474579dde48065d1816615ddbeead76241db8ea8539f50d01c17089adc54f213_1646665866639929.jpg"></a>
-        <a id="google" href="/auth/google" class="btn"><img src="https://logo-resources.thevc.kr/organizations/80x80/0245f6ea8d29ddc39286e0cd0ab97912eac3c26664a8700a6b08c00ce1982cf0_1617243129683114.jpg"></a>
+        <a id="kakao" href="/auth/kakao" class="btn"><img
+                src="https://oopy.lazyrockets.com/api/v2/notion/image?src=https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Ff5d7b9d3-6faa-4fbd-92fb-abc13883f4ac%2Fkakao.png&blockId=845a0760-d543-46ae-965d-018c4289eb32&width=80"></a>
+        <a id="naver" href="/auth/naver" class="btn"><img
+                src="https://logo-resources.thevc.kr/organizations/80x80/474579dde48065d1816615ddbeead76241db8ea8539f50d01c17089adc54f213_1646665866639929.jpg"></a>
+        <a id="google" href="/auth/google" class="btn"><img
+                src="https://logo-resources.thevc.kr/organizations/80x80/0245f6ea8d29ddc39286e0cd0ab97912eac3c26664a8700a6b08c00ce1982cf0_1617243129683114.jpg"></a>
     </div>
 
 
@@ -31,6 +34,15 @@
                     console.error('카카오톡 로그인 오류 발생', error);
                 });
         });
+        function setCookie(name, value, days) {
+            var expires = "";
+            if (days) {
+                var date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + value + expires + "; path=/";
+        }
 
         // 네이버 로그인 버튼에 클릭 이벤트 리스너 추가
         naverButton.addEventListener('click', () => {
@@ -52,8 +64,8 @@
                 });
         });
 
-         // 구글 로그인 버튼에 클릭 이벤트 리스너 추가
-         naverButton.addEventListener('click', () => {
+        // 구글 로그인 버튼에 클릭 이벤트 리스너 추가
+        naverButton.addEventListener('click', () => {
             // '/auth/kakao' 경로로 GET 요청 보내기
             fetch('/auth/google', {
                 method: 'GET',
@@ -71,6 +83,6 @@
                     console.error('구글 로그인 오류 발생', error);
                 });
         });
-        
+
     </script>
 </body>
