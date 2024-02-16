@@ -184,7 +184,6 @@ router.post(
       const { email, password, passwordConfirm, name, phone, gender, birth } =
         req.body;
       if (!email) {
-        // return res.status(400).json({ message: '이메일은 필수값입니다.' });
         return res
           .status(404)
           .send(
@@ -192,7 +191,6 @@ router.post(
           );
       }
       if (!password) {
-        // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
         return res
           .status(404)
           .send(
@@ -200,9 +198,6 @@ router.post(
           );
       }
       if (!passwordConfirm) {
-        // return res
-        //   .status(400)
-        //   .json({ message: '비밀번호 확인은 필수값입니다.' });
         return res
           .status(404)
           .send(
@@ -210,9 +205,6 @@ router.post(
           );
       }
       if (password.email < 6) {
-        // return res
-        //   .status(400)
-        //   .json({ message: '비밀번호는 최소 6자 이상입니다.' });
         return res
           .status(404)
           .send(
@@ -220,9 +212,6 @@ router.post(
           );
       }
       if (password !== passwordConfirm) {
-        // return res
-        //   .status(400)
-        //   .json({ message: '비밀번호가 일치하지 않습니다.' });
         return res
           .status(404)
           .send(
@@ -230,7 +219,6 @@ router.post(
           );
       }
       if (!name) {
-        // return res.status(400).json({ message: '이름은 필수값입니다.' });
         return res
           .status(404)
           .send(
@@ -238,7 +226,6 @@ router.post(
           );
       }
       if (!gender) {
-        // return res.status(400).json({ message: '성별을 입력해주세요.' });
         return res
           .status(404)
           .send(
@@ -246,7 +233,6 @@ router.post(
           );
       }
       if (!birth) {
-        // return res.status(400).json({ message: '생년월일을 입력해주세요.' });
         return res
           .status(404)
           .send(
@@ -360,7 +346,6 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user)
-      // return res.status(401).json({ message: '존재하지 않는 이메일입니다.' });
       return res
         .status(400)
         .send(
@@ -368,7 +353,6 @@ router.post('/sign-in', async (req, res, next) => {
         );
   } else {
     if (!email) {
-      // return res.status(400).json({ message: '이메일은 필수값입니다.' });
       return res
         .status(400)
         .send(
@@ -376,7 +360,6 @@ router.post('/sign-in', async (req, res, next) => {
         );
     }
     if (!password) {
-      // return res.status(400).json({ message: '비밀번호는 필수값입니다.' });
       return res
         .status(400)
         .send(
@@ -391,7 +374,6 @@ router.post('/sign-in', async (req, res, next) => {
       },
     });
     if (!user) {
-      // return res.status(401).json({ message: '잘못된 로그인 정보입니다.' });
       return res
         .status(400)
         .send(
@@ -418,7 +400,6 @@ router.post('/sign-in', async (req, res, next) => {
 router.post('/sign-out', async (req, res, next) => {
   res.clearCookie('accessToken');
   res.clearCookie('refreshToken');
-  // return res.json({ message: '로그아웃 되었습니다.' });
   return res.redirect('/posts');
 });
 
@@ -519,10 +500,6 @@ router.patch(
       },
     });
 
-    // return res.json({
-    //   message: '사용자 정보가 업데이트되었습니다.',
-    //   data: updatedUser,
-    // });
     return res.redirect('/users/profile');
   }
 );
@@ -544,7 +521,6 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
         email: true,
       },
     });
-    // return res.status(200).render('following.ejs',{user : followingUsers})
 
     res.render('following.ejs', { users: followingUsers });
   } catch (err) {
@@ -570,8 +546,6 @@ router.get('/follower', jwtValidate, verifiedEmail, async (req, res, next) => {
         email: true,
       },
     });
-
-    // return res.status(200).render('follower.ejs',{user : followers})
 
     return res.render('follower.ejs', { followers: followers });
   } catch (err) {
