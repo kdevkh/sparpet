@@ -61,7 +61,7 @@ router.post(
       });
       return res.status(201).redirect(`/posts/${Number(postId)}`);
     } catch (error) {
-      return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');</script>`);
+      return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');window.location.replace('/posts')</script>`);
     }
   }
 );
@@ -72,7 +72,7 @@ router.get('/posts', jwtValidate, verifiedEmail, async (req, res, next) => {
   try {
     const user = res.locals.user;
 
-    const likes = await prisma.Likes.findMany({
+    const like = await prisma.Likes.findMany({
       where: {
         userId: user.id,
       },
@@ -95,15 +95,19 @@ router.get('/posts', jwtValidate, verifiedEmail, async (req, res, next) => {
       }
     });
 
-    for (let i = 0; i < likes.length; i++) {
-      if (poslikests[i].attachFile !== null && likes[i].attachFile !== '') {
-        const tmp = likes[i].attachFile
+    const posts = [];
+    for (let i = 0; i < like.length; i++) {
+
+      posts.push(like[i].post);
+
+      if (like[i].post.attachFile !== null && like[i].post.attachFile !== '') {
+        const tmp = like[i].post.attachFile
           .split(',')
           .filter((file) =>
             ['jpg', 'jpeg', 'png', 'gif'].includes(file.split('.')[1])
           );
         if (tmp.length === 0) {
-          likes[i].attachFile =
+          like[i].post.attachFile =
             'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
         } else {
           const command = new GetObjectCommand({
@@ -113,24 +117,24 @@ router.get('/posts', jwtValidate, verifiedEmail, async (req, res, next) => {
 
           const signedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 }); // 1h후 만료
 
-          likes[i].attachFile = signedUrl;
+          like[i].post.attachFile = signedUrl;
         }
       } else {
-        likes[i].attachFile =
+        like[i].post.attachFile =
           'https://s3.orbi.kr/data/file/united2/ee9383d48d17470daf04007152b83dc0.png';
       }
     }
 
-    if (likes.length < 1) {
+    if (like.length < 1) {
       return res
         .status(404)
         .json({ message: '좋아요를 누른 게시물이 없습니다.' });
     }
-
-    return res.status(200).render('main.ejs', { data: likes });
+    
+    return res.status(200).render('main.ejs', { data: posts });
 
   } catch (error) {
-    return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');</script>`);
+    return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');window.location.replace('/posts')</script>`);
   }
 });
 
@@ -192,7 +196,7 @@ router.post(
       return res.status(201).redirect(`/posts/${Number(postId)}`);
 
     } catch (error) {
-      return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');</script>`);
+      return res.status(500).send(`<script>alert('서버 내부에서 오류가 발생했습니다.');window.location.replace('/posts')</script>`);
     }
   }
 );
