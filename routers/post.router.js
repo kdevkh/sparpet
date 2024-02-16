@@ -43,7 +43,6 @@ router.get('/following', jwtValidate, verifiedEmail, async (req, res, next) => {
   });
 
   if (followingUsersIdList.length == 0)
-    // return res.status(404).json({ message: '게시물이 없습니다.' });
     return res.status(404).send("<script>alert('게시물이 없습니다.');window.location.replace('/posts')</script>")
   followingUsersIdList = followingUsersIdList.map((v) => v.id);
 
@@ -369,7 +368,6 @@ router.delete(
       where: { id: Number(postId) },
     });
 
-    // return res.status(201).end();
     return res.status(201).redirect('/posts');
   }
 );
@@ -398,9 +396,6 @@ router.post(
           .send(
             `<script>alert('자기자신을 팔로우할 수 없습니다.');history.back();</script>`
           );
-        // return res
-        // .status(400)
-        // .json({ message: '자기자신을 팔로우할 수 없습니다.' });
       }
 
       // 이미 팔로우한 user인지 확인 -> 언팔로우
